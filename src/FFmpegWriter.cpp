@@ -1799,6 +1799,10 @@ bool FFmpegWriter::write_video_packet(std::shared_ptr<Frame> frame, AVFrame* fra
 		if (video_outbuf)
 			delete[] video_outbuf;
 
+		// deallocate AVFrame
+		av_freep(&(frame_final->data[0]));
+            	AV_FREE_FRAME(&frame_final);
+
 		// Deallocate packet
 		AV_FREE_PACKET(&pkt);
 	}
