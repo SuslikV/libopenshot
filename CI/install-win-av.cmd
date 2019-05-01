@@ -68,5 +68,32 @@ REM
 REM let us see what is installed now within MSYS2
 bash -lc "pacman -Q"
 
+REM Resolve UnitTest++ Dependency
+SETLOCAL
+cd %APPVEYOR_BUILD_FOLDER%\downloads
+set UnitTestppSHA1=bc5d87f484cac2959b0a0eafbde228e69e828d74
+IF NOT EXIST "UnitTestpp.zip" curl -kLO "https://github.com/unittest-cpp/unittest-cpp/archive/%UnitTestppSHA1%.zip" -f --retry 4 --output UnitTestpp.zip
+dir
+7z x UnitTestpp.zip
+ren "unittest-cpp-%UnitTestppSHA1%" unittest-cpp
+dir
+ENDLOCAL
+REM
+REM Build it with MinGW
+REM
+cd unittest-cpp
+dir
+mkdir build
+cmake -G "MinGW Makefiles" ..
+mingw32-make
+mingw32-make install
+REM
+REM Set environment variable
+set UNITTEST_DIR=%ProgramFiles(x86)%\UnitTest++
+IF NOT DEFINED ProgramFiles(x86) set UNITTEST_DIR=%ProgramFiles%\UnitTest++
+REM Check if it was set correctly
+set
+
+
 REM unmute output
 @echo on
