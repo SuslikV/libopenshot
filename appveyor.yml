@@ -1,0 +1,62 @@
+#---------------------------------#
+#      general configuration      #
+#---------------------------------#
+
+# version format
+version: "{build}"
+
+# branches to build 
+branches:
+  # whitelist
+  only:
+    - patch-3
+  # blacklisted
+  except:
+    - /.*/    # exclude all branches but whitelisted
+    
+#---------------------------------#
+#    environment configuration    #
+#---------------------------------#
+
+# Build worker image (VM template)
+image:
+  - Visual Studio 2015
+
+# environment variables
+#environment:
+  # there common variables for all groups. I have any
+  # first group, maybe not needed at all
+  #matrix:
+    #- platform: x64
+    #  configuration: Release
+
+# build platform, i.e. x86, x64, Any CPU. This setting is optional.
+platform:
+  - x64
+
+# build Configuration, i.e. Debug, Release, etc.
+configuration:
+  - Release
+
+# scripts that run after cloning repository
+install:
+  # running under CI
+  - set CI_TESTING=1
+  - cmd: '%APPVEYOR_BUILD_FOLDER%\CI\install-win-av.cmd'
+  - 'echo End install at: & time /t'
+
+# Build settings
+build: off # disable MSBuild
+
+# to run custom scripts instead of automatic MSBuild
+build_script:
+  - 'echo We are building...'
+  - cmd: '%APPVEYOR_BUILD_FOLDER%\CI\build-win-av.cmd'
+  - 'echo End building at: & time /t'
+
+# scripts to run after build (working directory and environment changes are persisted from the previous steps)
+#after_build:
+  #- cmd: '%APPVEYOR_BUILD_FOLDER%\CI\pack-win-av.cmd'
+  #- ps: Push-AppveyorArtifact "$Env:OpenShotFilesPath\libopenshot-audio\libopenshot-audio-win-$Env:PLATFORM.7z" -FileName "libopenshot-audio-$(git --git-dir=$Env:APPVEYOR_BUILD_FOLDER\.git describe --always --abbrev=8)-win-$Env:PLATFORM.7z"
+
+test: off
