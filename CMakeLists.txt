@@ -91,6 +91,24 @@ IF (WIN32)
 	SET_PROPERTY(GLOBAL PROPERTY WIN32 "WIN32")
 ENDIF(WIN32)
 
+#### define _WIN32_WINNT for some odd macros
+if(WIN32)
+    # We have to set _WIN32_WINNT for Asio
+    if(${CMAKE_SYSTEM_VERSION} EQUAL 10) # Windows 10
+        add_definitions(-D _WIN32_WINNT=0x0A00)
+    elseif(${CMAKE_SYSTEM_VERSION} EQUAL 6.3) # Windows 8.1
+        add_definitions(-D _WIN32_WINNT=0x0603)
+    elseif(${CMAKE_SYSTEM_VERSION} EQUAL 6.2) # Windows 8
+        add_definitions(-D _WIN32_WINNT=0x0602)
+    elseif(${CMAKE_SYSTEM_VERSION} EQUAL 6.1) # Windows 7
+        add_definitions(-D _WIN32_WINNT=0x0601)
+    elseif(${CMAKE_SYSTEM_VERSION} EQUAL 6.0) # Windows Vista
+        add_definitions(-D _WIN32_WINNT=0x0600)
+    else() # Windows XP (5.1)
+        add_definitions(-D _WIN32_WINNT=0x0501)
+    endif()
+endif()
+
 ############## FIND ALL QT RELATED HEADERS ##############
 set(QT_HEADER_DIR ${CMAKE_CURRENT_SOURCE_DIR}/include/Qt)
 FILE(GLOB QT_HEADER_FILES "${QT_HEADER_DIR}/*.h")
