@@ -88,6 +88,7 @@ REM
 cd unittest-cpp
 dir
 mkdir build
+cd build
 cmake -G "MinGW Makefiles" ..
 mingw32-make
 mingw32-make install
