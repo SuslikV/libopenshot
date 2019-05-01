@@ -68,10 +68,11 @@ REM
 REM let us see what is installed now within MSYS2
 bash -lc "pacman -Q"
 
+@echo on
 REM Resolve UnitTest++ Dependency
 IF NOT EXIST "%ProgramFiles(x86)%\UnitTest++" (
-SETLOCAL
 cd %APPVEYOR_BUILD_FOLDER%\downloads
+SETLOCAL
 set UnitTestppSHA1=bc5d87f484cac2959b0a0eafbde228e69e828d74
 echo %UnitTestppSHA1%
 IF NOT EXIST "UnitTestpp.zip" curl -kL "https://github.com/unittest-cpp/unittest-cpp/archive/%UnitTestppSHA1%.zip" -f --retry 4 --output UnitTestpp.zip
