@@ -1,0 +1,85 @@
+#---------------------------------#
+#      general configuration      #
+#---------------------------------#
+
+# version format
+version: "{build}"
+
+# branches to build 
+branches:
+  # whitelist
+  only:
+    - patch-3
+  # blacklisted
+  except:
+    - /.*/    # exclude all branches but whitelisted
+    
+#---------------------------------#
+#    environment configuration    #
+#---------------------------------#
+
+# Build worker image (VM template)
+image:
+  - Visual Studio 2015
+
+# scripts that are called at very beginning, before repo cloning
+init:
+  # if 0 then restore cache (default), otherwise it will be updated in the end of the successful build
+  - ps: IF (0) {$env:APPVEYOR_CACHE_SKIP_RESTORE = "true"}
+
+# environment variables
+environment:
+  # there common variables for all groups. I have any
+  # first group, maybe not needed at all
+  matrix:
+    - platform: x64
+      configuration: Release
+      # OpenShot x64 dependencies folder
+      OPENSHOT_DEPS_DIR: 'C:\OPSH\Deps'
+      # OpenShot x64 installation folder
+      OPENSHOT_INST_DIR: 'C:\OPSH\libopenshot'
+      # Python folder
+      PYTHONHOME: 'C:\Python37-x64'
+      # Specifies where the source of Qt libs lies, IN_MSYS2 if MSYS2 package is used
+      OPENSHOT_QT_SOURCE: 'DEPS_FOLDER'
+
+# build cache to preserve files/folders between builds
+cache:
+  # ffmpeg
+  - '%APPVEYOR_BUILD_FOLDER%\downloads\ffmpeg-4.2-win64-dev.zip'
+  - '%APPVEYOR_BUILD_FOLDER%\downloads\ffmpeg-4.2-win64-shared.zip'
+  - '%APPVEYOR_BUILD_FOLDER%\downloads\UnitTestpp.zip'
+  - '%OPENSHOT_DEPS_DIR%'
+  - '%APPVEYOR_BUILD_FOLDER%\downloads\python-%PLATFORM%.7z'
+  - '%APPVEYOR_BUILD_FOLDER%\downloads\last-libopenshot-audio.txt'
+  - '%APPVEYOR_BUILD_FOLDER%\downloads\OpenShot-Ext-Deps-win-x64-N491m01.7z'
+
+# build platform, i.e. x86, x64, Any CPU. This setting is optional.
+#platform:
+#  - x64
+
+# build Configuration, i.e. Debug, Release, etc.
+#configuration:
+#  - Release
+
+# scripts that run after cloning repository
+install:
+  - cmd: 'echo Start install at: & time /t'
+  - cmd: '%APPVEYOR_BUILD_FOLDER%\CI\install-win-av.cmd'
+  - cmd: 'echo End install at: & time /t'
+
+# Build settings
+build: off # disable MSBuild
+
+# to run custom scripts instead of automatic MSBuild
+build_script:
+  - cmd: 'echo Start building at: & time /t'
+  - cmd: '%APPVEYOR_BUILD_FOLDER%\CI\build-win-av.cmd'
+  - cmd: 'echo End building at: & time /t'
+
+# scripts to run after build (working directory and environment changes are persisted from the previous steps)
+after_build:
+  - cmd: '%APPVEYOR_BUILD_FOLDER%\CI\pack-win-av.cmd'
+  - ps: Push-AppveyorArtifact "$Env:OPENSHOT_INST_DIR\libopenshot-win-$Env:PLATFORM.7z" -FileName "libopenshot-$(git --git-dir=$Env:APPVEYOR_BUILD_FOLDER\.git describe --always --abbrev=8)-win-$Env:PLATFORM-N$Env:APPVEYOR_BUILD_NUMBER.7z"
+
+test: off
