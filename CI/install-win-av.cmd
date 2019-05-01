@@ -101,6 +101,23 @@ IF NOT DEFINED ProgramFiles(x86) set UNITTEST_DIR=%ProgramFiles%\UnitTest++
 REM Check if it was set correctly
 set
 
+REM Resolve libopenshot-audio dependency
+cd %APPVEYOR_BUILD_FOLDER%\downloads
+REM clone and checkout patch-1 branch
+git clone --branch patch-1 https://github.com/SuslikV/libopenshot-audio.git
+dir
+cd libopenshot-audio
+dir
+REM Make new building dir
+mkdir build
+cd build
+cmake --version
+cmake -G "MinGW Makefiles" -DCMAKE_SH="CMAKE_SH-NOTFOUND" -DUSE_CXX_GNU_EXTENSIONS:BOOL=ON ..
+mingw32-make --version
+mingw32-make VERBOSE=1
+mingw32-make install
+set
+REM set LIBOPENSHOT_AUDIO_DIR=%ProgramFiles(x86)%\libopenshot-audio
 
 REM unmute output
 @echo on
