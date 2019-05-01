@@ -38,10 +38,10 @@ image:
 # build cache to preserve files/folders between builds
 cache:
   # ffmpeg
-  #- '%APPVEYOR_BUILD_FOLDER%\downloads\ffmpeg-20190429-ac551c5-win64-dev.zip'
-  #- '%APPVEYOR_BUILD_FOLDER%\downloads\ffmpeg-20190429-ac551c5-win64-shared.zip'
-  #- '%ProgramFiles(x86)%\UnitTest++'
-  #- '%ProgramFiles(x86)%\libopenshot-audio'
+  - '%APPVEYOR_BUILD_FOLDER%\downloads\ffmpeg-20190429-ac551c5-win64-dev.zip'
+  - '%APPVEYOR_BUILD_FOLDER%\downloads\ffmpeg-20190429-ac551c5-win64-shared.zip'
+  - '%ProgramFiles(x86)%\UnitTest++'
+  - '%ProgramFiles(x86)%\libopenshot-audio'
 
 # build platform, i.e. x86, x64, Any CPU. This setting is optional.
 platform:
