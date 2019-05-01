@@ -73,9 +73,10 @@ IF NOT EXIST "%ProgramFiles(x86)%\UnitTest++" (
 SETLOCAL
 cd %APPVEYOR_BUILD_FOLDER%\downloads
 set UnitTestppSHA1=bc5d87f484cac2959b0a0eafbde228e69e828d74
-IF NOT EXIST "UnitTestpp.zip" curl -kLO https://github.com/unittest-cpp/unittest-cpp/archive/%UnitTestppSHA1%.zip -f --retry 4
+echo %UnitTestppSHA1%
+IF NOT EXIST "UnitTestpp.zip" curl -kL "https://github.com/unittest-cpp/unittest-cpp/archive/%UnitTestppSHA1%.zip" -f --retry 4 --output UnitTestpp.zip
 dir
-ren %UnitTestppSHA1%.zip UnitTestpp.zip
+REM ren %UnitTestppSHA1%.zip UnitTestpp.zip
 7z x UnitTestpp.zip
 ren "unittest-cpp-%UnitTestppSHA1%" unittest-cpp
 dir
