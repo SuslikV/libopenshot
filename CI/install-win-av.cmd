@@ -23,8 +23,14 @@ IF NOT EXIST "%APPVEYOR_BUILD_FOLDER%\downloads" mkdir %APPVEYOR_BUILD_FOLDER%\d
 REM Download FFmpeg dependencies
 cd %APPVEYOR_BUILD_FOLDER%\downloads
 IF NOT EXIST "ffmpeg-20190429-ac551c5-win64-dev.zip" curl -kLO https://ffmpeg.zeranoe.com/builds/win64/dev/ffmpeg-20190429-ac551c5-win64-dev.zip -f --retry 4
+IF NOT EXIST "ffmpeg-20190429-ac551c5-win64-shared.zip" curl -kLO https://ffmpeg.zeranoe.com/builds/win64/shared/ffmpeg-20190429-ac551c5-win64-shared.zip -f --retry 4
 dir
-REM 7z x ffmpeg-20190429-ac551c5-win64-dev.zip -offmpeg
+7z x ffmpeg-20190429-ac551c5-win64-dev.zip -offmpeg
+7z x ffmpeg-20190429-ac551c5-win64-shared.zip -offmpeg -aoa
+REM Keep all in one folder, maybe "mklink /D" is better here
+cd %APPVEYOR_BUILD_FOLDER%\downloads\ffmpeg
+move  /Y %APPVEYOR_BUILD_FOLDER%\downloads\ffmpeg\ffmpeg-20190429-ac551c5-win64-dev\*.* ..\
+move /Y %APPVEYOR_BUILD_FOLDER%\downloads\ffmpeg\ffmpeg-20190429-ac551c5-win64-shared\*.* ..\
 dir /s
 REM Add ffmpeg folders to PATH
 set FFMPEGDIR=%APPVEYOR_BUILD_FOLDER%\downloads\ffmpeg
