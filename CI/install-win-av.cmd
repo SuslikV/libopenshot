@@ -68,6 +68,7 @@ REM
 REM let us see what is installed now within MSYS2
 bash -lc "pacman -Q"
 
+@echo on
 REM Resolve UnitTest++ Dependency
 IF NOT EXIST "%ProgramFiles(x86)%\UnitTest++" (
 SETLOCAL
