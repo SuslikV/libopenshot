@@ -23,9 +23,9 @@ image:
   - Visual Studio 2015
 
 # scripts that are called at very beginning, before repo cloning
-#init:
-  #save cache at least once
-  #- ps: IF ($env:APPVEYOR_SAVE_CACHE_ON_ERROR -eq "false") {$env:APPVEYOR_SAVE_CACHE_ON_ERROR = "true"}
+init:
+  # if 0 then restore cache (default), otherwise it will be updated in the end of the successful build
+  - ps: IF (0) {$env:APPVEYOR_CACHE_SKIP_RESTORE = "true"}
 
 # environment variables
 #environment:
