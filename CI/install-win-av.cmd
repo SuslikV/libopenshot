@@ -50,7 +50,11 @@ REM Add ffmpeg folders to PATH
 set FFMPEGDIR=%APPVEYOR_BUILD_FOLDER%\downloads\ffmpeg
 
 REM Resolve Qt depenndency
-set QTDIR=C:\Qt\5.12.2
+REM set QTDIR=C:\Qt\5.12.2
+cd C:\Qt\5.12.2\mingw73_64
+dir
+REM update PATH
+set PATH=C:\Qt\5.12.2\mingw73_64\bin;%PATH%
 
 REM unmute output
 @echo on
