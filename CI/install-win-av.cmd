@@ -68,7 +68,6 @@ REM
 REM let us see what is installed now within MSYS2
 bash -lc "pacman -Q"
 
-@echo on
 REM Resolve UnitTest++ Dependency
 IF EXIST "%ProgramFiles(x86)%\UnitTest++" goto :UnitTestppInstalled
 cd %APPVEYOR_BUILD_FOLDER%\downloads
@@ -89,7 +88,7 @@ cd unittest-cpp
 dir
 mkdir build
 cd build
-cmake -G "MinGW Makefiles" ..
+cmake -G "MinGW Makefiles" -DCMAKE_SH="CMAKE_SH-NOTFOUND" ..
 mingw32-make
 mingw32-make install
 REM
