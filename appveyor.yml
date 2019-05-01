@@ -68,8 +68,8 @@ build_script:
   - 'echo End building at: & time /t'
 
 # scripts to run after build (working directory and environment changes are persisted from the previous steps)
-#after_build:
-  #- cmd: '%APPVEYOR_BUILD_FOLDER%\CI\pack-win-av.cmd'
-  #- ps: Push-AppveyorArtifact "$Env:OpenShotFilesPath\libopenshot-audio\libopenshot-audio-win-$Env:PLATFORM.7z" -FileName "libopenshot-audio-$(git --git-dir=$Env:APPVEYOR_BUILD_FOLDER\.git describe --always --abbrev=8)-win-$Env:PLATFORM.7z"
+after_build:
+  - cmd: '%APPVEYOR_BUILD_FOLDER%\CI\pack-win-av.cmd'
+  - ps: Push-AppveyorArtifact "$Env:OpenShotFilesPath\libopenshot\libopenshot-win-$Env:PLATFORM.7z" -FileName "libopenshot-$(git --git-dir=$Env:APPVEYOR_BUILD_FOLDER\.git describe --always --abbrev=8)-win-$Env:PLATFORM.7z"
 
 test: off
