@@ -11,7 +11,8 @@ echo:
 cd 
 
 REM cmake will unable to compile without "MinGW\bin" path to PATH
-set PATH=C:\MinGW\bin;%PATH%
+REM set PATH=C:\MinGW\bin;%PATH%
+set PATH=C:\mingw-w64\x86_64-8.1.0-posix-seh-rt_v6-rev0\bin;%PATH%
 echo:
 echo PATH environment variable was updated.
 echo %PATH%
