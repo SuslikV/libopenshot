@@ -60,6 +60,12 @@ REM Resolve ZMQ dependency
 bash -lc "pacman -S --needed --noconfirm mingw64/mingw-w64-x86_64-zeromq"
 REM
 REM let us see what is installed now within MSYS2
+REM bash -lc "pacman -Q"
+
+REM Resolve SWIG dependency
+bash -lc "pacman -S --needed --noconfirm mingw64/mingw-w64-x86_64-swig"
+REM
+REM let us see what is installed now within MSYS2
 bash -lc "pacman -Q"
 
 REM unmute output
