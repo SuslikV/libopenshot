@@ -27,13 +27,24 @@ IF NOT EXIST "ffmpeg-20190429-ac551c5-win64-shared.zip" curl -kLO https://ffmpeg
 dir
 7z x ffmpeg-20190429-ac551c5-win64-dev.zip -offmpeg
 7z x ffmpeg-20190429-ac551c5-win64-shared.zip -offmpeg -aoa
+REM
 REM Keep all in one folder
+REM
 REM first archive
-ren "%APPVEYOR_BUILD_FOLDER%\downloads\ffmpeg\ffmpeg-20190429-ac551c5-win64-dev" "ffmpeg"
-move "%APPVEYOR_BUILD_FOLDER%\downloads\ffmpeg\ffmpeg" "%APPVEYOR_BUILD_FOLDER%\downloads"
+cd %APPVEYOR_BUILD_FOLDER%\downloads\ffmpeg\ffmpeg-20190429-ac551c5-win64-dev
+REM move folders
+for /d %x in (*) do (move "%x" "%APPVEYOR_BUILD_FOLDER%\downloads\ffmpeg")
+REM move files
+for %x in (*) do (move "%x" "%APPVEYOR_BUILD_FOLDER%\downloads\ffmpeg")
+REM
 REM second archive
-ren "%APPVEYOR_BUILD_FOLDER%\downloads\ffmpeg\ffmpeg-20190429-ac551c5-win64-shared" "ffmpeg"
-move "%APPVEYOR_BUILD_FOLDER%\downloads\ffmpeg\ffmpeg" "%APPVEYOR_BUILD_FOLDER%\downloads"
+cd %APPVEYOR_BUILD_FOLDER%\downloads\ffmpeg\ffmpeg-20190429-ac551c5-win64-shared
+REM move folders
+for /d %x in (*) do (move "%x" "%APPVEYOR_BUILD_FOLDER%\downloads\ffmpeg")
+REM move files
+for %x in (*) do (move "%x" "%APPVEYOR_BUILD_FOLDER%\downloads\ffmpeg")
+REM
+cd %APPVEYOR_BUILD_FOLDER%\downloads\ffmpeg
 dir /s
 REM Add ffmpeg folders to PATH
 set FFMPEGDIR=%APPVEYOR_BUILD_FOLDER%\downloads\ffmpeg
