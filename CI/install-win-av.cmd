@@ -70,7 +70,7 @@ bash -lc "pacman -Q"
 
 @echo on
 REM Resolve UnitTest++ Dependency
-IF NOT EXIST "%ProgramFiles(x86)%\UnitTest++" (
+IF EXIST "%ProgramFiles(x86)%\UnitTest++" goto :UnitTestppInstalled
 cd %APPVEYOR_BUILD_FOLDER%\downloads
 SETLOCAL
 set UnitTestppSHA1=bc5d87f484cac2959b0a0eafbde228e69e828d74
@@ -92,8 +92,8 @@ cmake -G "MinGW Makefiles" ..
 mingw32-make
 mingw32-make install
 REM
-REM UnitTest++ already installed
-)
+REM Here UnitTest++ already installed
+:UnitTestppInstalled
 REM
 REM Set environment variable
 set UNITTEST_DIR=%ProgramFiles(x86)%\UnitTest++
