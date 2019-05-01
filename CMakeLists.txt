@@ -78,7 +78,14 @@ Generating build files for OpenShot
 #### Enable C++11 (for std::shared_ptr support)
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_CXX_EXTENSIONS OFF)
+
+#### Optional C++ restirctions
+option(USE_CXX_GNU_EXTENSIONS "Allow GNU C++ extensions" OFF)
+if(USE_CXX_GNU_EXTENSIONS)
+	set(CMAKE_CXX_EXTENSIONS ON)
+else()
+	set(CMAKE_CXX_EXTENSIONS OFF)
+endif()
 
 IF (WIN32)
 	SET_PROPERTY(GLOBAL PROPERTY WIN32 "WIN32")
