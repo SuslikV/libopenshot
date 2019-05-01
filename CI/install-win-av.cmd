@@ -56,5 +56,11 @@ dir
 REM update PATH
 set PATH=C:\Qt\5.12.2\mingw73_64\bin;%PATH%
 
+REM Resolve ZMQ dependency
+bash -lc "pacman -S --needed --noconfirm mingw64/mingw-w64-x86_64-zeromq"
+REM
+REM let us see what is installed now within MSYS2
+bash -lc "pacman -Q"
+
 REM unmute output
 @echo on
