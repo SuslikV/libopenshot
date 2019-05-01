@@ -28,9 +28,12 @@ dir
 7z x ffmpeg-20190429-ac551c5-win64-dev.zip -offmpeg
 7z x ffmpeg-20190429-ac551c5-win64-shared.zip -offmpeg -aoa
 REM Keep all in one folder
-cd %APPVEYOR_BUILD_FOLDER%\downloads\ffmpeg
-move "%APPVEYOR_BUILD_FOLDER%\downloads\ffmpeg\ffmpeg-20190429-ac551c5-win64-dev" "%APPVEYOR_BUILD_FOLDER%\downloads\ffmpeg"
-move "%APPVEYOR_BUILD_FOLDER%\downloads\ffmpeg\ffmpeg-20190429-ac551c5-win64-shared" "%APPVEYOR_BUILD_FOLDER%\downloads\ffmpeg"
+REM first archive
+ren "%APPVEYOR_BUILD_FOLDER%\downloads\ffmpeg\ffmpeg-20190429-ac551c5-win64-dev" "ffmpeg"
+move "%APPVEYOR_BUILD_FOLDER%\downloads\ffmpeg\ffmpeg" "%APPVEYOR_BUILD_FOLDER%\downloads"
+REM second archive
+ren "%APPVEYOR_BUILD_FOLDER%\downloads\ffmpeg\ffmpeg-20190429-ac551c5-win64-shared" "ffmpeg"
+move "%APPVEYOR_BUILD_FOLDER%\downloads\ffmpeg\ffmpeg" "%APPVEYOR_BUILD_FOLDER%\downloads"
 dir /s
 REM Add ffmpeg folders to PATH
 set FFMPEGDIR=%APPVEYOR_BUILD_FOLDER%\downloads\ffmpeg
