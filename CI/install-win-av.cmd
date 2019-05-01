@@ -103,6 +103,7 @@ set
 
 REM Resolve libopenshot-audio dependency
 cd %APPVEYOR_BUILD_FOLDER%\downloads
+IF EXIST "%ProgramFiles(x86)%\libopenshot-audio" goto :libopenshot-audioInstalled
 REM clone and checkout patch-1 branch
 git clone --branch patch-1 https://github.com/SuslikV/libopenshot-audio.git
 dir
@@ -116,8 +117,9 @@ cmake -G "MinGW Makefiles" -DCMAKE_SH="CMAKE_SH-NOTFOUND" -DUSE_CXX_GNU_EXTENSIO
 mingw32-make --version
 mingw32-make VERBOSE=1
 mingw32-make install
-set
-REM set LIBOPENSHOT_AUDIO_DIR=%ProgramFiles(x86)%\libopenshot-audio
+REM Here libopenshot-audio already installed
+:libopenshot-audioInstalled
+set LIBOPENSHOT_AUDIO_DIR=%ProgramFiles(x86)%\libopenshot-audio
 
 REM unmute output
 @echo on
