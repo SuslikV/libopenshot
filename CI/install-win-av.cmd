@@ -29,8 +29,8 @@ dir
 7z x ffmpeg-20190429-ac551c5-win64-shared.zip -offmpeg -aoa
 REM Keep all in one folder, maybe "mklink /D" is better here
 cd %APPVEYOR_BUILD_FOLDER%\downloads\ffmpeg
-move  /Y %APPVEYOR_BUILD_FOLDER%\downloads\ffmpeg\ffmpeg-20190429-ac551c5-win64-dev\*.* ..\
-move /Y %APPVEYOR_BUILD_FOLDER%\downloads\ffmpeg\ffmpeg-20190429-ac551c5-win64-shared\*.* ..\
+mklink /D %APPVEYOR_BUILD_FOLDER%\downloads\ffmpeg\ffmpeg-20190429-ac551c5-win64-dev %APPVEYOR_BUILD_FOLDER%\downloads\ffmpeg
+mklink /D %APPVEYOR_BUILD_FOLDER%\downloads\ffmpeg\ffmpeg-20190429-ac551c5-win64-shared %APPVEYOR_BUILD_FOLDER%\downloads\ffmpeg
 dir /s
 REM Add ffmpeg folders to PATH
 set FFMPEGDIR=%APPVEYOR_BUILD_FOLDER%\downloads\ffmpeg
