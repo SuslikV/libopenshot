@@ -25,7 +25,7 @@ image:
 # scripts that are called at very beginning, before repo cloning
 init:
   # if 0 then restore cache (default), otherwise it will be updated in the end of the successful build
-  - ps: IF (0) {$env:APPVEYOR_CACHE_SKIP_RESTORE = "true"}
+  - ps: IF (1) {$env:APPVEYOR_CACHE_SKIP_RESTORE = "true"}
 
 # environment variables
 #environment:
@@ -69,7 +69,7 @@ build_script:
 
 # scripts to run after build (working directory and environment changes are persisted from the previous steps)
 after_build:
-  - cmd: '%APPVEYOR_BUILD_FOLDER%\CI\pack-win-av.cmd'
-  - ps: Push-AppveyorArtifact "$Env:OpenShotFilesPath\libopenshot\libopenshot-win-$Env:PLATFORM.7z" -FileName "libopenshot-$(git --git-dir=$Env:APPVEYOR_BUILD_FOLDER\.git describe --always --abbrev=8)-win-$Env:PLATFORM.7z"
+  #- cmd: '%APPVEYOR_BUILD_FOLDER%\CI\pack-win-av.cmd'
+  #- ps: Push-AppveyorArtifact "$Env:OpenShotFilesPath\libopenshot\libopenshot-win-$Env:PLATFORM.7z" -FileName "libopenshot-$(git --git-dir=$Env:APPVEYOR_BUILD_FOLDER\.git describe --always --abbrev=8)-win-$Env:PLATFORM.7z"
 
 test: off
