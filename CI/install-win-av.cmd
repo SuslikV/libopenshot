@@ -13,6 +13,9 @@ echo:
 REM we need to update PATH with MSYS2 dirs, also it resolves ZLIB dependency and finds static one at C:/msys64/mingw64/lib/libz.dll.a,
 REM while dynamic zlib is in C:\msys64\mingw64\bin\zlib1.dll
 set PATH=C:\msys64\mingw64\bin;C:\msys64\usr\bin;%PATH%
+REM cmake will unable to compile without "MinGW\bin" path to PATH
+REM set PATH=C:\MinGW\bin;%PATH% - is 32bit
+set PATH=C:\mingw-w64\x86_64-8.1.0-posix-seh-rt_v6-rev0\bin;%PATH%
 
 REM let us see what is installed within MSYS2
 bash -lc "pacman -Q"
