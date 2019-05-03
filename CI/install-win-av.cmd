@@ -48,7 +48,6 @@ REM move files
 for %%x in (*) do (move "%%x" "%APPVEYOR_BUILD_FOLDER%\downloads\ffmpeg")
 REM
 cd %APPVEYOR_BUILD_FOLDER%\downloads\ffmpeg
-dir /s
 REM Add ffmpeg folders to PATH
 set FFMPEGDIR=%APPVEYOR_BUILD_FOLDER%\downloads\ffmpeg
 
@@ -116,7 +115,7 @@ REM Make new building dir
 mkdir build
 cd build
 cmake --version
-cmake -G "MinGW Makefiles" -DCMAKE_SH="CMAKE_SH-NOTFOUND" -DUSE_CXX_GNU_EXTENSIONS:BOOL=ON ..
+cmake -G "MinGW Makefiles" -DCMAKE_SH="CMAKE_SH-NOTFOUND" ..
 mingw32-make --version
 mingw32-make VERBOSE=1
 mingw32-make install
