@@ -124,8 +124,10 @@ REM Here libopenshot-audio already installed
 set LIBOPENSHOT_AUDIO_DIR=%ProgramFiles(x86)%\libopenshot-audio
 
 REM Resolve Python3 dependency
-set PYTHONHOME=C:\Python37-x64
-set PYTHONPATH=C:\Python37-x64\Scripts;%PYTHONPATH%
+set PYTHONHOME=C:\Python36-x64
+set PATH=C:\Python36-x64;C:\Python36-x64\Scripts;%PATH%
+cd C:\Python36-x64
+dir
 
 REM unmute output
 @echo on
