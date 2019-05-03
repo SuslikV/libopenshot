@@ -128,6 +128,8 @@ set PYTHONHOME=C:\Python36-x64
 set PATH=C:\Python36-x64;C:\Python36-x64\Scripts;%PATH%
 cd C:\Python36-x64
 dir
+cd C:\Python36-x64\libs
+dir
 
 REM unmute output
 @echo on
