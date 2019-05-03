@@ -105,7 +105,7 @@ set
 
 REM Resolve libopenshot-audio dependency
 cd %APPVEYOR_BUILD_FOLDER%\downloads
-IF NOT EXIST "%ProgramFiles(x86)%\libopenshot-audio" goto :libopenshot-audioInstalled
+IF EXIST "%ProgramFiles(x86)%\libopenshot-audio" goto :libopenshot-audioInstalled
 REM clone and checkout patch-1 branch
 git clone --branch patch-1 https://github.com/SuslikV/libopenshot-audio.git
 dir
