@@ -53,19 +53,18 @@ configuration:
 
 # scripts that run after cloning repository
 install:
-  # running under CI
-  - set CI_TESTING=1
+  - cmd: 'echo Start install at: & time /t'
   - cmd: '%APPVEYOR_BUILD_FOLDER%\CI\install-win-av.cmd'
-  - 'echo End install at: & time /t'
+  - cmd: 'echo End install at: & time /t'
 
 # Build settings
 build: off # disable MSBuild
 
 # to run custom scripts instead of automatic MSBuild
 build_script:
-  - 'echo We are building...'
+  - cmd: 'echo Start building at: & time /t'
   - cmd: '%APPVEYOR_BUILD_FOLDER%\CI\build-win-av.cmd'
-  - 'echo End building at: & time /t'
+  - cmd: 'echo End building at: & time /t'
 
 # scripts to run after build (working directory and environment changes are persisted from the previous steps)
 after_build:
