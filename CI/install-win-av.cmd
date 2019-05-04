@@ -24,10 +24,11 @@ REM Remove python2
 bash -lc "pacman -Rsc --noconfirm python2"
 REM Remove python2 from PATH
 set PATH=%PATH:C:\Python27;=%
+set PATH=%PATH:C:\Python27\Scripts;=%
 set
 
 REM Do not build all stuff, just terminate here
-exit 1
+REM exit 1
 
 REM Create downloads folder for external dependencies
 IF NOT EXIST "%APPVEYOR_BUILD_FOLDER%\downloads" mkdir %APPVEYOR_BUILD_FOLDER%\downloads
@@ -133,11 +134,13 @@ REM Here libopenshot-audio already installed
 set LIBOPENSHOT_AUDIO_DIR=%ProgramFiles(x86)%\libopenshot-audio
 
 REM Resolve Python3 dependency
-REM set PYTHONHOME=C:\Python36-x64
-REM set PATH=C:\Python36-x64;C:\Python36-x64\Scripts;%PATH%
+set PYTHONHOME=C:\Python36-x64
+set PATH=C:\Python36-x64;C:\Python36-x64\Scripts;%PATH%
 cd C:\Python36-x64
 dir
 cd C:\Python36-x64\libs
+dir
+cd C:\Python36-x64\include
 dir
 
 REM unmute output
