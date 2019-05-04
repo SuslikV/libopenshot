@@ -24,7 +24,7 @@ REM Remove python2
 bash -lc "pacman -Rsc --noconfirm python2"
 REM Remove python2 from PATH
 ren "C:\Python27" "Python2_7"
-c:
+cd c:\
 dir
 
 exit 1
