@@ -25,7 +25,7 @@ image:
 # scripts that are called at very beginning, before repo cloning
 init:
   # if 0 then restore cache (default), otherwise it will be updated in the end of the successful build
-  - ps: IF (0) {$env:APPVEYOR_CACHE_SKIP_RESTORE = "true"}
+  - ps: IF (1) {$env:APPVEYOR_CACHE_SKIP_RESTORE = "true"}
 
 # environment variables
 #environment:
