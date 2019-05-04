@@ -15,8 +15,10 @@ REM while dynamic zlib is in C:\msys64\mingw64\bin\zlib1.dll
 set PATH=C:\msys64\mingw64\bin;C:\msys64\usr\bin;%PATH%
 REM cmake will unable to compile without "MinGW\bin" path to PATH
 REM set PATH=C:\MinGW\bin;%PATH% - is 32bit
-set PATH=C:\mingw-w64\x86_64-7.2.0-posix-seh-rt_v5-rev1\bin;%PATH%
-cd C:\mingw-w64\x86_64-7.2.0-posix-seh-rt_v5-rev1\bin
+set PATH=C:\mingw-w64\x86_64-7.2.0-posix-seh-rt_v5-rev1;%PATH%
+cd C:\mingw-w64
+dir
+cd C:\mingw-w64\x86_64-7.2.0-posix-seh-rt_v5-rev1
 dir
 
 REM let us see what is installed within MSYS2
