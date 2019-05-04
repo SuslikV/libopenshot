@@ -10,6 +10,11 @@ echo Platform: %PLATFORM%
 echo Default build folder: %APPVEYOR_BUILD_FOLDER%
 echo:
 
+REM look for python 3.6
+bash -lc "pacman -Ss python3"
+
+exit 1
+
 REM we need to update PATH with MSYS2 dirs, also it resolves ZLIB dependency and finds static one at C:/msys64/mingw64/lib/libz.dll.a,
 REM while dynamic zlib is in C:\msys64\mingw64\bin\zlib1.dll
 set PATH=C:\msys64\mingw64\bin;C:\msys64\usr\bin;%PATH%
@@ -124,8 +129,8 @@ REM Here libopenshot-audio already installed
 set LIBOPENSHOT_AUDIO_DIR=%ProgramFiles(x86)%\libopenshot-audio
 
 REM Resolve Python3 dependency
-set PYTHONHOME=C:\Python36-x64
-set PATH=C:\Python36-x64;C:\Python36-x64\Scripts;%PATH%
+REM set PYTHONHOME=C:\Python36-x64
+REM set PATH=C:\Python36-x64;C:\Python36-x64\Scripts;%PATH%
 cd C:\Python36-x64
 dir
 cd C:\Python36-x64\libs
