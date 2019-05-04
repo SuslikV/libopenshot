@@ -1,6 +1,6 @@
 REM Install script before build; for appveyor.com
 REM mute output
-@echo off
+@echo on
 
 cd %APPVEYOR_BUILD_FOLDER%
 
@@ -9,11 +9,6 @@ echo:
 echo Platform: %PLATFORM%
 echo Default build folder: %APPVEYOR_BUILD_FOLDER%
 echo:
-
-REM look for python 3.6
-bash -lc "pacman -Ss python3"
-
-exit 1
 
 REM we need to update PATH with MSYS2 dirs, also it resolves ZLIB dependency and finds static one at C:/msys64/mingw64/lib/libz.dll.a,
 REM while dynamic zlib is in C:\msys64\mingw64\bin\zlib1.dll
@@ -24,6 +19,11 @@ set PATH=C:\mingw-w64\x86_64-8.1.0-posix-seh-rt_v6-rev0\bin;%PATH%
 
 REM let us see what is installed within MSYS2
 bash -lc "pacman -Q"
+
+REM look for python 3.6
+bash -lc "pacman -Ss python3"
+
+exit 1
 
 REM Create downloads folder for external dependencies
 IF NOT EXIST "%APPVEYOR_BUILD_FOLDER%\downloads" mkdir %APPVEYOR_BUILD_FOLDER%\downloads
