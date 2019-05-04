@@ -21,7 +21,7 @@ REM let us see what is installed within MSYS2
 bash -lc "pacman -Q"
 
 REM Remove python2
-bash -lc "pacman -Rs --noconfirm python2"
+bash -lc "pacman -Rsc --noconfirm python2"
 REM Remove python2 from PATH
 ren "C:\Python27" "C:\Python2_7"
 
