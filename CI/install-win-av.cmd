@@ -22,6 +22,8 @@ cd C:\mingw-w64\x86_64-7.2.0-posix-seh-rt_v5-rev1
 dir
 cd mingw64
 dir
+cd bin
+dir
 
 exit 1
 
