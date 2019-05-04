@@ -27,7 +27,8 @@ ren "C:\Python27" "Python2_7"
 cd c:\
 dir
 
-exit 1
+REM Do not build all stuff, just terminate here
+REM exit 1
 
 REM Create downloads folder for external dependencies
 IF NOT EXIST "%APPVEYOR_BUILD_FOLDER%\downloads" mkdir %APPVEYOR_BUILD_FOLDER%\downloads
