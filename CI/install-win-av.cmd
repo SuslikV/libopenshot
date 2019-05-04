@@ -20,6 +20,10 @@ cd C:\mingw-w64
 dir
 cd C:\mingw-w64\x86_64-7.2.0-posix-seh-rt_v5-rev1
 dir
+cd mingw64
+dir
+
+exit 1
 
 REM let us see what is installed within MSYS2
 bash -lc "pacman -Q"
@@ -32,7 +36,7 @@ set PATH=%PATH:C:\Python27\Scripts;=%
 set
 
 REM Do not build all stuff, just terminate here
-exit 1
+REM exit 1
 
 REM Create downloads folder for external dependencies
 IF NOT EXIST "%APPVEYOR_BUILD_FOLDER%\downloads" mkdir %APPVEYOR_BUILD_FOLDER%\downloads
