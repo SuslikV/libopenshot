@@ -27,7 +27,7 @@ dir
 
 REM get rid of _hypot in Phyton 3.6
 cd C:\Python36-x64\include
-findstr  /v /c "#define hypot _hypot" pyconfig.h > pyconfig2.h
+findstr  /v /c:"#define hypot _hypot" pyconfig.h > pyconfig2.h
 ren pyconfig.h pyconfig_old.h
 ren pyconfig2.h pyconfig.h
 type pyconfig.h
