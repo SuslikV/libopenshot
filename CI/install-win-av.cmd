@@ -32,8 +32,6 @@ ren pyconfig.h pyconfig_old.h
 ren pyconfig2.h pyconfig.h
 type pyconfig.h
 
-exit 1
-
 REM let us see what is installed within MSYS2
 bash -lc "pacman -Q"
 
