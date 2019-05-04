@@ -23,12 +23,11 @@ bash -lc "pacman -Q"
 REM Remove python2
 bash -lc "pacman -Rsc --noconfirm python2"
 REM Remove python2 from PATH
-ren "C:\Python27" "Python2_7"
-cd c:\
-dir
+set PATH=%PATH:C:\Python27;=%
+set
 
 REM Do not build all stuff, just terminate here
-REM exit 1
+exit 1
 
 REM Create downloads folder for external dependencies
 IF NOT EXIST "%APPVEYOR_BUILD_FOLDER%\downloads" mkdir %APPVEYOR_BUILD_FOLDER%\downloads
