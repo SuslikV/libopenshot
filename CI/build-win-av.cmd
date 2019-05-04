@@ -23,7 +23,7 @@ mkdir %APPVEYOR_BUILD_FOLDER%\build
 cd %APPVEYOR_BUILD_FOLDER%\build
 
 cmake --version
-cmake -G "MinGW Makefiles" -DCMAKE_SH="CMAKE_SH-NOTFOUND" ..
+cmake -G "MinGW Makefiles" -DCMAKE_SH="CMAKE_SH-NOTFOUND" -DPYTHON_INCLUDE_DIR="C:/Python36-x64/include/" -DPYTHON_LIBRARY="C:/Python36-x64/libs/libpython36.a" ..
 mingw32-make --version
 mingw32-make
 mingw32-make install
