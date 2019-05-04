@@ -25,6 +25,14 @@ dir
 cd bin
 dir
 
+REM get rid of _hypot in Phyton 3.6
+cd C:\Python36-x64\include
+findstr  /v /c "#define hypot _hypot" pyconfig.h > pyconfig2.h
+ren pyconfig.h pyconfig_old.h
+ren pyconfig2.h pyconfig.h
+
+exit 1
+
 REM let us see what is installed within MSYS2
 bash -lc "pacman -Q"
 
@@ -150,6 +158,7 @@ cd C:\Python36-x64\libs
 dir
 cd C:\Python36-x64\include
 dir
+
 
 REM unmute output
 @echo on
