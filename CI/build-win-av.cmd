@@ -26,4 +26,5 @@ cmake --version
 cmake -G "MinGW Makefiles" -DCMAKE_SH="CMAKE_SH-NOTFOUND" -DPYTHON_EXECUTABLE="C:/Python36-x64/python.exe" -DPYTHON_INCLUDE_DIR="C:/Python36-x64/include/" -DPYTHON_LIBRARY="C:/Python36-x64/libs/libpython36.a" ..
 mingw32-make --version
 mingw32-make VERBOSE=1
+mingw32-make test
 mingw32-make install
