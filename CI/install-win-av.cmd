@@ -115,7 +115,7 @@ cd unittest-cpp
 dir
 mkdir build
 cd build
-cmake -G "MinGW Makefiles" -DCMAKE_SH="CMAKE_SH-NOTFOUND" ..
+cmake -G "MinGW Makefiles" -DCMAKE_SH="CMAKE_SH-NOTFOUND" -DCMAKE_SYSTEM_NAME=Windows -DCMAKE_SYSTEM_VERSION=6.1 ..
 mingw32-make
 mingw32-make install
 REM
@@ -130,7 +130,23 @@ set
 
 REM Resolve libopenshot-audio dependency
 cd %APPVEYOR_BUILD_FOLDER%\downloads
-IF EXIST "%ProgramFiles(x86)%\libopenshot-audio" goto :libopenshot-audioInstalled
+REM Get current hash
+git ls-remote https://github.com/SuslikV/libopenshot-audio.git patch-1 > current-head.txt
+IF EXIST current-head.txt (
+  ECHO libopenshot-audio current:
+  TYPE current-head.txt
+)
+IF EXIST last-libopenshot-audio.txt (
+  ECHO libopenshot-audio cached:
+  TYPE last-libopenshot-audio.txt
+)
+REM Compare current to cached hash, recompile if hash fails
+FC current-head.txt last-libopenshot-audio.txt > NUL
+IF errorlevel 1 GOTO :InstLibAudio
+IF EXIST "%ProgramFiles(x86)%\libopenshot-audio" GOTO :LibAudioInstalled
+:InstLibAudio
+REM Store last compiled hash value to cache it later
+git ls-remote https://github.com/SuslikV/libopenshot-audio.git patch-1 > last-libopenshot-audio.txt
 REM clone and checkout patch-1 branch
 git clone --branch patch-1 https://github.com/SuslikV/libopenshot-audio.git
 dir
@@ -140,12 +156,12 @@ REM Make new building dir
 mkdir build
 cd build
 cmake --version
-cmake -G "MinGW Makefiles" -DCMAKE_SH="CMAKE_SH-NOTFOUND" ..
+cmake -G "MinGW Makefiles" -DCMAKE_SH="CMAKE_SH-NOTFOUND" -DCMAKE_SYSTEM_NAME=Windows -DCMAKE_SYSTEM_VERSION=6.1 ..
 mingw32-make --version
-mingw32-make VERBOSE=1
+mingw32-make
 mingw32-make install
 REM Here libopenshot-audio already installed
-:libopenshot-audioInstalled
+:LibAudioInstalled
 set LIBOPENSHOT_AUDIO_DIR=%ProgramFiles(x86)%\libopenshot-audio
 
 REM Resolve Python3 dependency
