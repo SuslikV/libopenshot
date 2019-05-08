@@ -3,12 +3,12 @@ REM Packing build into archive
 SET OpenShotFilesPath=%ProgramFiles(x86)%
 IF NOT DEFINED ProgramFiles(x86) SET OpenShotFilesPath=%ProgramFiles%
 
-echo %OpenShotFilesPath%
+ECHO Using source path: %OpenShotFilesPath%\libopenshot
 REM Went to installation folder
-cd "%OpenShotFilesPath%\libopenshot"
+CD "%OpenShotFilesPath%\libopenshot"
 
-dir /s
+ECHO Creating archive...
 
-7z a -t7z libopenshot-win-%PLATFORM%.7z * -xr!.gitignore
+7z a -bsp2 -t7z libopenshot-win-%PLATFORM%.7z * -xr!.gitignore
 
-dir
+DIR
