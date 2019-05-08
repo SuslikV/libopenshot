@@ -27,4 +27,6 @@ cmake -G "MinGW Makefiles" -DCMAKE_SH="CMAKE_SH-NOTFOUND" -DPYTHON_EXECUTABLE="C
 mingw32-make --version
 mingw32-make VERBOSE=1
 REM mingw32-make test
+REM Look for shared lib
+dir /s libopenshot.dll
 mingw32-make install
