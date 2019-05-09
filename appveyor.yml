@@ -42,6 +42,7 @@ cache:
   - '%APPVEYOR_BUILD_FOLDER%\downloads\ffmpeg-20190429-ac551c5-win64-shared.zip'
   - 'C:\OPS\UTpp'
   - 'C:\OPS\libopenshot-audio'
+  - '%APPVEYOR_BUILD_FOLDER%\downloads\last-libopenshot-audio.txt'
 
 # build platform, i.e. x86, x64, Any CPU. This setting is optional.
 platform:
