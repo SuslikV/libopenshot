@@ -1,7 +1,7 @@
 REM Packing build into archive
 
-SET OpenShotFilesPath=%ProgramFiles(x86)%
-IF NOT DEFINED ProgramFiles(x86) SET OpenShotFilesPath=%ProgramFiles%
+SET OpenShotFilesPath=C:\OPS
+REM IF NOT DEFINED ProgramFiles(x86) SET OpenShotFilesPath=%ProgramFiles%
 
 ECHO Using source path: %OpenShotFilesPath%\libopenshot
 REM Went to installation folder
