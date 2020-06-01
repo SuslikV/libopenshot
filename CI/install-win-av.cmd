@@ -48,7 +48,7 @@ REM Resolve libopenshot-audio dependency
 REM We build it first because it requires less dependencies in comparison to libopenshot library
 CD %APPVEYOR_BUILD_FOLDER%\downloads
 REM Get current hash
-git ls-remote https://github.com/SuslikV/libopenshot-audio.git patch-1 > current-head.txt
+git ls-remote https://github.com/SuslikV/libopenshot-audio.git what-you-have-missed-so-far > current-head.txt
 IF EXIST current-head.txt (
   ECHO libopenshot-audio current:
   TYPE current-head.txt
@@ -65,9 +65,9 @@ IF EXIST "%OPENSHOT_DEPS_DIR%\libopenshot-audio" GOTO LibAudioInstalled
 REM Remove libopenshot-audio destination folder for clear install
 IF EXIST "%OPENSHOT_DEPS_DIR%\libopenshot-audio" RMDIR "%OPENSHOT_DEPS_DIR%\libopenshot-audio" /s /q
 REM Store last compiled hash value to cache it later
-git ls-remote https://github.com/SuslikV/libopenshot-audio.git patch-1 > last-libopenshot-audio.txt
-REM clone and checkout patch-1 branch
-git clone --branch patch-1 https://github.com/SuslikV/libopenshot-audio.git
+git ls-remote https://github.com/SuslikV/libopenshot-audio.git what-you-have-missed-so-far > last-libopenshot-audio.txt
+REM clone and checkout what-you-have-missed-so-far branch
+git clone --branch what-you-have-missed-so-far https://github.com/SuslikV/libopenshot-audio.git
 DIR
 CD libopenshot-audio
 DIR

@@ -9,7 +9,7 @@ version: "{build}"
 branches:
   # whitelist
   only:
-    - patch-3
+    - what-you-have-missed-so-far
   # blacklisted
   except:
     - /.*/    # exclude all branches but whitelisted
@@ -35,9 +35,9 @@ environment:
     - platform: x64
       configuration: Release
       # OpenShot x64 dependencies folder
-      OPENSHOT_DEPS_DIR: 'C:\OPSH\Deps'
+      OPENSHOT_DEPS_DIR: 'C:\OPSH\Deps-WYH'
       # OpenShot x64 installation folder
-      OPENSHOT_INST_DIR: 'C:\OPSH\libopenshot'
+      OPENSHOT_INST_DIR: 'C:\OPSH\libopenshot-WYH'
       # Python folder
       PYTHONHOME: 'C:\Python37-x64'
       # Specifies where the source of Qt libs lies, IN_MSYS2 if MSYS2 package is used
@@ -80,6 +80,6 @@ build_script:
 # scripts to run after build (working directory and environment changes are persisted from the previous steps)
 after_build:
   - cmd: '%APPVEYOR_BUILD_FOLDER%\CI\pack-win-av.cmd'
-  - ps: Push-AppveyorArtifact "$Env:OPENSHOT_INST_DIR\libopenshot-win-$Env:PLATFORM.7z" -FileName "libopenshot-$(git --git-dir=$Env:APPVEYOR_BUILD_FOLDER\.git describe --always --abbrev=8)-win-$Env:PLATFORM-N$Env:APPVEYOR_BUILD_NUMBER.7z"
+  - ps: Push-AppveyorArtifact "$Env:OPENSHOT_INST_DIR\libopenshot-win-$Env:PLATFORM.7z" -FileName "libopenshot-WYH-$(git --git-dir=$Env:APPVEYOR_BUILD_FOLDER\.git describe --always --abbrev=8)-win-$Env:PLATFORM-N$Env:APPVEYOR_BUILD_NUMBER.7z"
 
 test: off
