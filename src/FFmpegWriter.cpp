@@ -358,7 +358,9 @@ void FFmpegWriter::SetOption(StreamType stream, std::string name, std::string va
 	// Was option found?
 	if (option || (name == "g" || name == "qmin" || name == "qmax" || name == "max_b_frames" || name == "mb_decision" ||
 				   name == "level" || name == "profile" || name == "slices" || name == "rc_min_rate" || name == "rc_max_rate" ||
-				   name == "rc_buffer_size" || name == "crf" || name == "cqp")) {
+				   name == "rc_buffer_size" || name == "crf" || name == "cqp" || name == "color_range" ||
+				   name == "color_primaries" || name == "color_trc" || name == "colorspace" ||
+				   name == "chroma_sample_location")) {
 		// Check for specific named options
 		if (name == "g")
 			// Set gop_size
@@ -523,6 +525,95 @@ void FFmpegWriter::SetOption(StreamType stream, std::string name, std::string va
 				}
 			}
 #endif
+		}
+		// Color range, primiries, transfer characteristics, colorspace
+		// and chroma sample location export settings. This also sets
+		// file container flags for color details if supported.
+		//
+		// The option may be set as keyword like:
+		//   SetOption(openshot.VIDEO_STREAM, "colorspace", "bt709")
+		//
+		// or integer number (n) of the required enumeration like:
+		//   SetOption(openshot.VIDEO_STREAM, "colorspace", str(int(n)))
+		//
+		// the first one for convenience, the later - for future use.
+		//
+		// To preserve current OpenShot behavior and for compatibility
+		// with old hardware and software, DO NOT set colorspace
+		// details if BT.601 standard is in use for the export. The
+		// defaults will apply of ITU-R BT601-6 625 (ITU-R BT1358 625,
+		// ITU-R BT1700 625 PAL & SECAM, IEC 61966-2-4 xvYCC601) and
+		// file container flags wouldn't be set (mainly used for old SD
+		// quality videos displayed by old HW).
+#if LIBAVFORMAT_VERSION_MAJOR >= 53
+		else if (c->codec_type == AVMEDIA_TYPE_VIDEO) {
+#else
+		else if (c->codec_type == CODEC_TYPE_VIDEO) {
+#endif
+			if (name == "color_range") {
+				// Look for keywords first
+				if ((value == "mpeg") || (value == "limited") || (value == "tv") || (value == "partial") || (value == "auto"))
+					value = std::to_string(AVCOL_RANGE_MPEG);
+				else if ((value == "jpeg") || (value == "full") || (value == "pc"))
+					value = std::to_string(AVCOL_RANGE_JPEG);
+				// Apply the value in range [0, AVCOL_RANGE_NB - 1]
+				c->color_range = static_cast<AVColorRange>(std::max(std::min(std::stoi(value), AVCOL_RANGE_NB - 1), 0));
+			} else if (name == "color_primaries") {
+				// Look for keywords first
+				if ((value == "bt709") || (value == "auto"))
+					value = std::to_string(AVCOL_PRI_BT709);
+				else if (value == "bt470m")
+					value = std::to_string(AVCOL_PRI_BT470M);
+				else if (value == "bt470bg")
+					value = std::to_string(AVCOL_PRI_BT470BG);
+				else if (value == "smpte170m")
+					value = std::to_string(AVCOL_PRI_SMPTE170M);
+				else if (value == "smpte240m")
+					value = std::to_string(AVCOL_PRI_SMPTE240M);
+				else if (value == "film")
+					value = std::to_string(AVCOL_PRI_FILM);
+				// Apply the value in range [0, AVCOL_PRI_NB - 1]
+				c->color_primaries = static_cast<AVColorPrimaries>(std::max(std::min(std::stoi(value), AVCOL_PRI_NB - 1), 0));
+			} else if (name == "color_trc") {
+				// Look for keywords first
+				if ((value == "bt709") || (value == "auto"))
+					value = std::to_string(AVCOL_TRC_BT709);
+				else if (value == "gamma22")
+					value = std::to_string(AVCOL_TRC_GAMMA22);
+				// All PAL users uses BT.709 trc in Europe instead of next 2.8 gamma. More info in Charles Poynton's books.
+				else if (value == "gamma28")
+					value = std::to_string(AVCOL_TRC_GAMMA28);
+				else if (value == "smpte240m")
+					value = std::to_string(AVCOL_TRC_SMPTE240M);
+				// Apply the value in range [0, AVCOL_TRC_NB - 1]
+				c->color_trc = static_cast<AVColorTransferCharacteristic>(std::max(std::min(std::stoi(value), AVCOL_TRC_NB - 1), 0));
+			} else if (name == "colorspace") {
+				// Look for keywords first
+				if ((value == "bt709") || (value == "auto"))
+					value = std::to_string(AVCOL_SPC_BT709);
+				else if (value == "rgb")
+					value = std::to_string(AVCOL_SPC_RGB);
+				else if (value == "fcc")
+					value = std::to_string(AVCOL_SPC_FCC);
+				else if (value == "bt470bg")
+					value = std::to_string(AVCOL_SPC_BT470BG);
+				else if (value == "smpte170m")
+					value = std::to_string(AVCOL_SPC_SMPTE170M);
+				else if (value == "smpte240m")
+					value = std::to_string(AVCOL_SPC_SMPTE240M);
+				// Apply the value in range [0, AVCOL_SPC_NB - 1]
+				c->colorspace = static_cast<AVColorSpace>(std::max(std::min(std::stoi(value), AVCOL_SPC_NB - 1), 0));
+			} else if (name == "chroma_sample_location") {
+				// Look for keywords first
+				if ((value == "mpeg2") || (value == "h264") || (value == "left") || (value == "auto"))
+					value = std::to_string(AVCHROMA_LOC_LEFT);
+				else if ((value == "jpeg") || (value == "mpeg1") || (value == "h263") || (value == "center"))
+					value = std::to_string(AVCHROMA_LOC_CENTER);
+				else if ((value == "dv") || (value == "601") || (value == "topleft"))
+					value = std::to_string(AVCHROMA_LOC_TOPLEFT);
+				// Apply the value in range [0, AVCHROMA_LOC_NB - 1]
+				c->chroma_sample_location = static_cast<AVChromaLocation>(std::max(std::min(std::stoi(value), AVCHROMA_LOC_NB - 1), 0));
+			}
 		} else {
 			// Set AVOption
 			AV_OPTION_SET(st, c->priv_data, name.c_str(), value.c_str(), c);
@@ -2149,25 +2240,121 @@ void FFmpegWriter::OutputStreamInfo() {
 	av_dump_format(oc, 0, path.c_str(), 1);
 }
 
+#define FIXED_1_0 (1 << 16)
+// Scaling video Color Range: PC, jpeg, Full
+#define Full_Range 1
+
 // Init a collection of software rescalers (thread safe)
 void FFmpegWriter::InitScalers(int source_width, int source_height) {
 	int scale_mode = SWS_FAST_BILINEAR;
 	if (openshot::Settings::Instance()->HIGH_QUALITY_SCALING) {
-		scale_mode = SWS_BICUBIC;
+		if (source_width <= info.width and source_height <= info.height) {
+			// Best for decreasing sizes. Here it always be used to convert
+			// chroma planes (1/2) even if zoom is x1.0
+			scale_mode = SWS_AREA;
+		} else {
+			// Default for FFmpeg's bicubic is B=0 (param0), C=0.6 (param1),
+			// suitable for enlarging. When enlarging, the luma info is more important,
+			// despite chroma may still be reduced in size for zoom factors less than x2.0
+			scale_mode = SWS_BICUBIC;
+		}
+
+		// For nice scaling of chroma planes from RGB to 4:2:0
+		scale_mode |= SWS_ACCURATE_RND;
+		scale_mode |= SWS_FULL_CHR_H_INT;
 	}
+
+	int chrH = 0; // Logarithm of horizontal subsampling factor between luma and chroma planes for pixel format
+	int chrV = 0; // Logarithm of vertical subsampling factor between luma and chroma planes for pixel format
+	const AVPixFmtDescriptor *frmt_desc = NULL; // Pixel format description
 
 	// Init software rescalers vector (many of them, one for each thread)
 	for (int x = 0; x < num_of_rescalers; x++) {
 		// Init the software scaler from FFMpeg
 #if HAVE_HW_ACCEL
 		if (hw_en_on && hw_en_supported) {
-			img_convert_ctx = sws_getContext(source_width, source_height, PIX_FMT_RGBA, info.width, info.height, AV_PIX_FMT_NV12, scale_mode, NULL, NULL, NULL);
+			frmt_desc = av_pix_fmt_desc_get(AV_PIX_FMT_NV12);
 		} else
 #endif // HAVE_HW_ACCEL
 		{
-			img_convert_ctx = sws_getContext(source_width, source_height, PIX_FMT_RGBA, info.width, info.height, AV_GET_CODEC_PIXEL_FORMAT(video_st, video_st->codec), scale_mode,
-											 NULL, NULL, NULL);
+			frmt_desc = av_pix_fmt_desc_get(AV_GET_CODEC_PIXEL_FORMAT(video_st, video_st->codec));
 		}
+
+		if (frmt_desc) {
+			chrH = frmt_desc->log2_chroma_w;
+			chrV = frmt_desc->log2_chroma_h;
+		}
+
+		img_convert_ctx = NULL;
+
+		// Chroma location should be set before sws_init_context()!
+		SwsContext *sws_ctx;
+		sws_ctx = sws_alloc_context();
+		if (sws_ctx) {
+			av_opt_set_int(sws_ctx, "sws_flags", scale_mode, 0);
+			av_opt_set_int(sws_ctx, "srcw", source_width, 0);
+			av_opt_set_int(sws_ctx, "srch", source_height, 0);
+			av_opt_set_int(sws_ctx, "dstw", info.width, 0);
+			av_opt_set_int(sws_ctx, "dsth", info.height, 0);
+
+#if LIBSWSCALE_VERSION_MAJOR >= 4 && LIBSWSCALE_VERSION_MINOR >= 6
+			//FFMPEG 3.3+
+			av_opt_set_pixel_fmt(sws_ctx, "src_format", PIX_FMT_RGBA, 0);
+#if HAVE_HW_ACCEL
+			if (hw_en_on && hw_en_supported) {
+				av_opt_set_pixel_fmt(sws_ctx, "dst_format", AV_PIX_FMT_NV12, 0);
+			} else
+#endif // HAVE_HW_ACCEL
+			{
+				av_opt_set_pixel_fmt(sws_ctx, "dst_format", AV_GET_CODEC_PIXEL_FORMAT(video_st, video_st->codec), 0);
+			}
+#else
+			//FFMPEG < 3.3
+			av_opt_set_int(sws_ctx, "src_format", (int) PIX_FMT_RGBA, 0);
+#if HAVE_HW_ACCEL
+			if (hw_en_on && hw_en_supported) {
+				av_opt_set_int(sws_ctx, "dst_format", (int) AV_PIX_FMT_NV12, 0);
+			} else
+#endif // HAVE_HW_ACCEL
+			{
+				av_opt_set_int(sws_ctx, "dst_format", (int) AV_GET_CODEC_PIXEL_FORMAT(video_st, video_st->codec), 0);
+			}
+#endif
+
+			// Assuming non-4:4:4 export
+			if (chrH != 0 or chrV != 0) {
+				// Get codec context in way similar to FFmpegWriter::SetOption
+				AVCodecContext *c = NULL;
+				c = AV_GET_CODEC_PAR_CONTEXT(video_st, video_codec);
+
+				// Specify chroma samples location on luma grid for destination image (4x4 grid or 0..256 x 0..256)
+				// Set only if was specified for the codec or leave untouched
+				int xpos;
+				int ypos;
+				if (avcodec_enum_to_chroma_pos(&xpos, &ypos, c->chroma_sample_location) != AVERROR(EINVAL)) {
+					av_opt_set_int(sws_ctx, "dst_h_chr_pos", xpos, 0);
+					av_opt_set_int(sws_ctx, "dst_v_chr_pos", ypos, 0);
+				}
+			}
+
+			if (sws_init_context(sws_ctx, NULL, NULL) < 0) {
+				sws_freeContext(sws_ctx);
+				//img_convert_ctx = NULL;
+			} else {
+				// Success!
+				img_convert_ctx = sws_ctx;
+			}
+		}
+
+		// Scaling uses own numeration for color ranges
+		// Assuming that Partial color range was set for destination
+		int dest_color_range = 0;
+		if (video_codec->color_range == AVCOL_RANGE_JPEG)
+			dest_color_range = Full_Range;
+
+		// Set encoding color details before scaling
+		sws_setColorspaceDetails(img_convert_ctx, sws_getCoefficients(SWS_CS_ITU709), Full_Range,
+				sws_getCoefficients(video_codec->colorspace), dest_color_range, 0, FIXED_1_0, FIXED_1_0);
 
 		// Add rescaler to vector
 		image_rescalers.push_back(img_convert_ctx);
