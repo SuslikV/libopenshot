@@ -89,6 +89,7 @@ bash -lc "curl -O http://repo.msys2.org/msys/x86_64/msys2-keyring-r21.b39fb11-1-
 bash -lc "pacman-key --init"
 bash -lc "pacman-key --populate msys2"
 bash -lc "pacman-key --verify msys2-keyring-r21.b39fb11-1-any.pkg.tar.xz.sig"
+bash -lc "pacman --ask 20 -U msys2-keyring-r21.b39fb11-1-any.pkg.tar.xz"
 
 REM Update MSYS2 itself
 bash -lc "pacman -Syu --noconfirm"
