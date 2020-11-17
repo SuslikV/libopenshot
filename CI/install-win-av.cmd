@@ -90,6 +90,8 @@ bash -lc "pacman-key --init"
 bash -lc "pacman-key --populate msys2"
 bash -lc "pacman-key --verify msys2-keyring-r21.b39fb11-1-any.pkg.tar.xz.sig"
 bash -lc "pacman --ask 20 -U msys2-keyring-r21.b39fb11-1-any.pkg.tar.xz"
+REM Stop any msys if running
+powershell.exe "Get-Process | Where-Object {$_.path -like 'C:\msys64*'} | Stop-Process"
 
 REM Update MSYS2 itself
 bash -lc "pacman -Syu --noconfirm"
