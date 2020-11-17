@@ -83,6 +83,16 @@ REM Here libopenshot-audio already installed
 :LibAudioInstalled
 SET LIBOPENSHOT_AUDIO_DIR=%OPENSHOT_DEPS_DIR%\libopenshot-audio
 
+REM new MSYS2 holders
+bash -lc "curl -O http://repo.msys2.org/msys/x86_64/msys2-keyring-r21.b39fb11-1-any.pkg.tar.xz"
+bash -lc "curl -O http://repo.msys2.org/msys/x86_64/msys2-keyring-r21.b39fb11-1-any.pkg.tar.xz.sig"
+bash -lc "pacman-key --init"
+bash -lc "pacman-key --populate msys2"
+bash -lc "pacman-key --verify msys2-keyring-r21.b39fb11-1-any.pkg.tar.xz.sig"
+bash -lc "pacman --ask 20 -U msys2-keyring-r21.b39fb11-1-any.pkg.tar.xz"
+REM Stop any msys if running
+powershell.exe "Get-Process | Where-Object {$_.path -like 'C:\msys64*'} | Stop-Process"
+
 REM Update MSYS2 itself
 bash -lc "pacman -Syu --noconfirm"
 
