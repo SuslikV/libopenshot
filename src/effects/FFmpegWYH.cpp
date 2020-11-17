@@ -145,7 +145,7 @@ std::shared_ptr<Frame> FFmpegWYH::GetFrame(std::shared_ptr<Frame> frame, int64_t
 
 	av_opt_set_int(filtered_frame, "width", w, 0);
 	av_opt_set_int(filtered_frame, "height", h, 0);
-	av_opt_set_int(sws_ctx, "format", (int) PIX_FMT_RGBA, 0);
+	av_opt_set_int(filtered_frame, "format", (int) PIX_FMT_RGBA, 0);
 
 	// allocate buffer and pointers for the filtered_frame
 	if (av_image_alloc(filtered_frame->data, filtered_frame->linesize, w, h, PIX_FMT_RGBA, 1) < 0)
@@ -158,7 +158,9 @@ std::shared_ptr<Frame> FFmpegWYH::GetFrame(std::shared_ptr<Frame> frame, int64_t
 
 	// copy frame_image data into filtered_frame (not filtered yet)
 	//av_image_copy(filtered_frame->data, filtered_frame->linesize, (const uint8_t **)f->data, src_linesize, PIX_FMT_RGBA, w, h);
-	av_image_copy(filtered_frame->data, filtered_frame->linesize, pixels, src_linesize, PIX_FMT_RGBA, w, h);
+	av_image_copy(filtered_frame->data, filtered_frame->linesize, (const uint8_t**) pixels, src_linesize, PIX_FMT_RGBA, w, h);
+
+	AVFilterContext *in_buf_src_ctx, *sink_buf_ctx;
 
 	// get buffers to load source and get final picture
 	in_buf_src_ctx = avfilter_graph_get_filter(graph, "Parsed_buffer_0");
