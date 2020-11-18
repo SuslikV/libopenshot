@@ -160,7 +160,8 @@ std::shared_ptr<Frame> FFmpegWYH::GetFrame(std::shared_ptr<Frame> frame, int64_t
 	av_opt_set_int(filtered_frame, "format", (int) PIX_FMT_RGBA, 0);
 
 	// allocate buffer and pointers for the filtered_frame
-	if (av_image_alloc(filtered_frame->data, filtered_frame->linesize, w, h, PIX_FMT_RGBA, 1) < 0)
+	ret = av_image_alloc(filtered_frame->data, filtered_frame->linesize, w, h, PIX_FMT_RGBA, 1);
+	if (ret < 0)
 		// skip further processing
 		func_fail = 60;
 		goto end;
@@ -180,14 +181,16 @@ std::shared_ptr<Frame> FFmpegWYH::GetFrame(std::shared_ptr<Frame> frame, int64_t
 	sink_buf_ctx = avfilter_graph_get_filter(graph, "Parsed_buffersink_2");
 
 	// load picture into input buffer
-	if (av_buffersrc_add_frame(in_buf_src_ctx, filtered_frame) < 0) {
+	ret = av_buffersrc_add_frame(in_buf_src_ctx, filtered_frame);
+	if (ret < 0) {
 		// skip further processing
 		func_fail = 70;
 		goto end;
 	}
 
 	// get filtered picture from the output buffer
-	if (av_buffersink_get_frame(sink_buf_ctx, filtered_frame) < 0) {
+	ret = av_buffersink_get_frame(sink_buf_ctx, filtered_frame);
+	if (ret < 0) {
 		// skip further processing
 		func_fail = 80;
 		goto end;
