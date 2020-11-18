@@ -170,6 +170,9 @@ std::shared_ptr<Frame> FFmpegWYH::GetFrame(std::shared_ptr<Frame> frame, int64_t
 	int src_linesize[4];
 	memcpy(&src_linesize, &filtered_frame->linesize, sizeof(src_linesize));
 
+	ZmqLogger::Instance()->AppendDebugMethod("img bytes perline", "bytesPerLine", frame_image->bytesPerLine(), "pixels_data_size", pixels_data_size);
+	ZmqLogger::Instance()->AppendDebugMethod("AVFrame src_linesize", "[0]", src_linesize[0], "[1]", src_linesize[1], "[2]", src_linesize[2], "[3]", src_linesize[3]);
+
 	// copy frame_image data into filtered_frame (not filtered yet)
 	//av_image_copy(filtered_frame->data, filtered_frame->linesize, (const uint8_t **)f->data, src_linesize, PIX_FMT_RGBA, w, h);
 	av_image_copy(filtered_frame->data, filtered_frame->linesize, (const uint8_t**) pixels, src_linesize, PIX_FMT_RGBA, w, h);
@@ -196,6 +199,7 @@ std::shared_ptr<Frame> FFmpegWYH::GetFrame(std::shared_ptr<Frame> frame, int64_t
 		goto end;
 	}
 
+	ZmqLogger::Instance()->AppendDebugMethod("AVFrame filterd_linesize", "[0]", filtered_frame->linesize[0], "[1]", filtered_frame->linesize[1], "[2]", filtered_frame->linesize[2], "[3]", filtered_frame->linesize[3]);
 	// copy filtered_frame data back to frame
 	memcpy(pixels, filtered_frame->data[0], pixels_data_size);
 
