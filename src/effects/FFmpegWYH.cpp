@@ -59,6 +59,14 @@ std::shared_ptr<Frame> FFmpegWYH::GetFrame(std::shared_ptr<Frame> frame, int64_t
 	AVFrame *filtered_frame = NULL;
 	char *filters_txt;
 
+	// Get the frame's image
+	std::shared_ptr<QImage> frame_image = frame->GetImage();
+	// Get data pixels
+	uint8_t *pixels = (uint8_t *) frame_image->scanLine(0);
+	int w = frame_image->width();
+	int h = frame_image->height();
+	int pixels_data_size = frame_image->bytesPerLine() * frame_image->height();
+
 	// streamline the text
 	std::istringstream full_txt(filter_graph_txt);
 
@@ -101,15 +109,6 @@ std::shared_ptr<Frame> FFmpegWYH::GetFrame(std::shared_ptr<Frame> frame, int64_t
 	}
 
 	// Next code is assuming that QImage and AVFrame data formats (image planes) equals
-	
-	// Get the frame's image
-	std::shared_ptr<QImage> frame_image = frame->GetImage();
-
-	// Get data pixels
-	uint8_t *pixels = (uint8_t *) frame_image->scanLine(0);
-	int w = frame_image->width();
-	int h = frame_image->height();
-	int pixels_data_size = frame_image->bytesPerLine() * frame_image->height();
 
 	// Frame modifications are starts from here
 
