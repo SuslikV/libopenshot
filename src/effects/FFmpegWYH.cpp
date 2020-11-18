@@ -168,7 +168,6 @@ std::shared_ptr<Frame> FFmpegWYH::GetFrame(std::shared_ptr<Frame> frame, int64_t
 		goto end;
 	}
 
-	goto end; // debug resources free
 
 	// copy of filtered_frame linesizes
 	int src_linesize[4];
@@ -215,29 +214,15 @@ end:
 	ZmqLogger::Instance()->AppendDebugMethod(description_str); // string only
 	// free FFmpeg buffer resouces
 	if (filtered_frame) {
-		ZmqLogger::Instance()->AppendDebugMethod("av_freep"); // string only
-		if (filtered_frame->data[0])
-			ZmqLogger::Instance()->AppendDebugMethod("av_freep: not null"); // string only
- 		av_freep(filtered_frame->data[0]); // frame data buffer (also pointer to the first component - R )
-		ZmqLogger::Instance()->AppendDebugMethod("av_frame_freen ptr"); // string only
-		if (&filtered_frame)
-			ZmqLogger::Instance()->AppendDebugMethod("av_frame_free ptr: not null"); // string only
+		ZmqLogger::Instance()->AppendDebugMethod("av_frame_free"); // string only
 		av_frame_free(&filtered_frame); // struct itself (holds only pointers to buffers)
 	}
 
 	// free graph
 	if (graph) {
 		//av_frame_unref(filtered_frame); if AVFrame is reused between calls (no new memory allocations)
-		ZmqLogger::Instance()->AppendDebugMethod("graph ptr"); // string only
-		if (&graph)
-			ZmqLogger::Instance()->AppendDebugMethod("graph ptr: not null"); // string only
-
+		ZmqLogger::Instance()->AppendDebugMethod("avfilter_graph_free"); // string only
 		avfilter_graph_free(&graph);
-
-		ZmqLogger::Instance()->AppendDebugMethod("graph"); // string only
-		if (graph)
-			ZmqLogger::Instance()->AppendDebugMethod("graph: not null"); // string only
-
 		graph = NULL;
 	}
 
