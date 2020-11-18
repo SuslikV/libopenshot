@@ -142,11 +142,12 @@ std::shared_ptr<Frame> FFmpegWYH::GetFrame(std::shared_ptr<Frame> frame, int64_t
 		goto end;
 	}
 
-	if (f_inps || f_outps)
+	if (f_inps || f_outps) {
 		// some not connected in/outs
 		// skip further processing
 		func_fail = 40;
 		goto end;
+	}
 
 	ret = avfilter_graph_config(graph, NULL);
 	if (ret < 0) {
