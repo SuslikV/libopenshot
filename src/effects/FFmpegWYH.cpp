@@ -50,6 +50,15 @@ std::shared_ptr<Frame> FFmpegWYH::GetFrame(std::shared_ptr<Frame> frame, int64_t
 	std::string description_str = "";
 	std::string arg_str = "";
 
+	// FFmpeg errors return values
+	int ret = 0;
+	int func_fail = 0;
+	
+	AVFilterGraph *graph = NULL;
+	AVFilterInOut *f_inps = NULL, *f_outps = NULL;
+	AVFrame *filtered_frame = NULL;
+	char *filters_txt;
+
 	// streamline the text
 	std::istringstream full_txt(filter_graph_txt);
 
@@ -64,8 +73,11 @@ std::shared_ptr<Frame> FFmpegWYH::GetFrame(std::shared_ptr<Frame> frame, int64_t
 	};
 
 	// skip further processing when version mismatch or empty file
-	if (version_str != "v1" && version_str != "v2" || description_str == "")
-		return frame;
+	if (version_str != "v1" && version_str != "v2" || description_str == "") {
+		// skip further processing
+		func_fail = 10;
+		goto end;
+	}
 
 	// Get keyframe values for this frame
 	/*
@@ -103,14 +115,14 @@ std::shared_ptr<Frame> FFmpegWYH::GetFrame(std::shared_ptr<Frame> frame, int64_t
 
 	// useful link https://github.com/KDE/ffmpegthumbs/blob/master/ffmpegthumbnailer/moviedecoder.cpp
 	
-	AVFilterGraph *graph;
-	char *filters_txt;
-	AVFilterInOut *f_inps = NULL, *f_outps = NULL;
+	// building AVFarme
+	filtered_frame = av_frame_alloc();
 
 	graph = avfilter_graph_alloc();
 	if (graph == NULL) {
 		// skip further processing
-		return frame;
+		func_fail = 20;
+		goto end;
 	}
 
 	// std::to_string((int) PIX_FMT_RGBA) == 26
@@ -122,26 +134,27 @@ std::shared_ptr<Frame> FFmpegWYH::GetFrame(std::shared_ptr<Frame> frame, int64_t
 	// final filter graph description string
 	filters_txt = &description_str[0];
 
-	if (avfilter_graph_parse2(graph, filters_txt, &f_inps, &f_outps) < 0) {
+	ret = avfilter_graph_parse2(graph, filters_txt, &f_inps, &f_outps);
+	if (ret < 0) {
 		// parse graph error
 		// skip further processing
-		return frame;
+		func_fail = 30;
+		goto end;
 	}
 
 	if (f_inps || f_outps)
 		// some not connected in/outs
 		// skip further processing
-		return frame;
+		func_fail = 40;
+		goto end;
 
-	if (avfilter_graph_config(graph, NULL) < 0) {
+	ret = avfilter_graph_config(graph, NULL);
+	if (ret < 0) {
 		// config graph error
 		// skip further processing
-		return frame;
+		func_fail = 50;
+		goto end;
 	}
-
-	// building AVFarme
-	AVFrame *filtered_frame;
-	filtered_frame = av_frame_alloc();
 
 	av_opt_set_int(filtered_frame, "width", w, 0);
 	av_opt_set_int(filtered_frame, "height", h, 0);
@@ -150,7 +163,8 @@ std::shared_ptr<Frame> FFmpegWYH::GetFrame(std::shared_ptr<Frame> frame, int64_t
 	// allocate buffer and pointers for the filtered_frame
 	if (av_image_alloc(filtered_frame->data, filtered_frame->linesize, w, h, PIX_FMT_RGBA, 1) < 0)
 		// skip further processing
-		return frame;
+		func_fail = 60;
+		goto end;
 
 	// copy of filtered_frame linesizes
 	int src_linesize[4];
@@ -169,22 +183,32 @@ std::shared_ptr<Frame> FFmpegWYH::GetFrame(std::shared_ptr<Frame> frame, int64_t
 	// load picture into input buffer
 	if (av_buffersrc_add_frame(in_buf_src_ctx, filtered_frame) < 0) {
 		// skip further processing
-		return frame;
+		func_fail = 70;
+		goto end;
 	}
 
 	// get filtered picture from the output buffer
 	if (av_buffersink_get_frame(sink_buf_ctx, filtered_frame) < 0) {
 		// skip further processing
-		return frame;
+		func_fail = 80;
+		goto end;
 	}
 
 	// copy filtered_frame data back to frame
 	memcpy(pixels, filtered_frame->data[0], pixels_data_size);
-	
+
+end:
+	// Debug output
+	ZmqLogger::Instance()->AppendDebugMethod("FFmpegWYH::GetFrame", "ret", ret, "func_fail", func_fail);
+	ZmqLogger::Instance()->AppendDebugMethod(description_str); // string only
+	// free FFmpeg buffer resouces
+	if (filtered_frame) {
+ 		av_freep(filtered_frame->data[0]); // frame data buffer (also pointer to the first component - R )
+		av_frame_free(&filtered_frame); // struct itself (holds only pointers to buffers)
+	}
+
 	// free graph
 	if (graph) {
-		av_freep(filtered_frame->data[0]); // frame data buffer (also pointer to the first component - R )
-		av_frame_free(&filtered_frame); // struct itself (holds only pointers to buffers)
 		//av_frame_unref(filtered_frame); if AVFrame is reused between calls (no new memory allocations)
 		avfilter_graph_free(&graph);
 		graph = NULL;
@@ -266,7 +290,7 @@ std::string FFmpegWYH::PropertiesJSON(int64_t requested_frame) const {
 	root["duration"] = add_property_json("Duration", Duration(), "float", "", NULL, 0, 30 * 60 * 60 * 48, true, requested_frame);
 
 	// Filter file with graph description
-	root["ffgraph"] = add_property_json("Filter File", 0.0, "string", "", NULL, -1, -1, false, requested_frame);
+	root["ffgraph"] = add_property_json("Filter File", 0.0, "string", filter_graph_txt, NULL, -1, -1, false, requested_frame);
 
 	// Keyframes
 	root["P1"] = add_property_json("P1", P1.GetValue(requested_frame), "float", "", &P1, -1000000.0, 1000000.0, false, requested_frame);
