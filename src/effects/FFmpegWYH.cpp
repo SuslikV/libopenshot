@@ -187,10 +187,9 @@ std::shared_ptr<Frame> FFmpegWYH::GetFrame(std::shared_ptr<Frame> frame, int64_t
 
 	ZmqLogger::Instance()->AppendDebugMethod("av_image_copy done");
 
-	int i;
 	ZmqLogger::Instance()->AppendDebugMethod("filters names from graph");
 	for (i = 0; i < graph->nb_filters; i++)
-		if (graph->filters[i]->name {
+		if (graph->filters[i]->name) {
 			ZmqLogger::Instance()->AppendDebugMethod(std:string(graph->filters[i]->name), "i" = i);
 		}
 
