@@ -58,6 +58,7 @@ std::shared_ptr<Frame> FFmpegWYH::GetFrame(std::shared_ptr<Frame> frame, int64_t
 	AVFilterInOut *f_inps = NULL, *f_outps = NULL;
 	AVFrame *filtered_frame = NULL;
 	char *filters_txt;
+	std::string filter_name = "";
 	AVFilterContext *in_buf_src_ctx, *sink_buf_ctx;
 
 	// Get the frame's image
@@ -190,7 +191,6 @@ std::shared_ptr<Frame> FFmpegWYH::GetFrame(std::shared_ptr<Frame> frame, int64_t
 
 	ZmqLogger::Instance()->AppendDebugMethod("filters names from graph");
 	// look for the output buffersink full name (like "Parsed_buffersink_3"), backward because it always lies close to the end
-	std::string filter_name = "";
 	for (i = graph->nb_filters - 1; i >= 0; i++)
 		if (graph->filters[i]->name) {
 			filter_name = std::string(graph->filters[i]->name);
@@ -207,7 +207,7 @@ std::shared_ptr<Frame> FFmpegWYH::GetFrame(std::shared_ptr<Frame> frame, int64_t
 		goto end;
 	}
 
-	sink_buf_ctx = avfilter_graph_get_filter(graph, filter_name);
+	sink_buf_ctx = avfilter_graph_get_filter(graph, &filter_name[0]);
 	if (sink_buf_ctx == NULL) {
 		// skip further processing
 		func_fail = 80;
