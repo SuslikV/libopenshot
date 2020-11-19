@@ -191,11 +191,11 @@ std::shared_ptr<Frame> FFmpegWYH::GetFrame(std::shared_ptr<Frame> frame, int64_t
 
 	ZmqLogger::Instance()->AppendDebugMethod("filters names from graph");
 	// look for the output buffersink full name (like "Parsed_buffersink_3"), backward because it always lies close to the end
-	for (i = graph->nb_filters - 1; i >= 0; i++)
+	for (i = graph->nb_filters - 1; i >= 0; i--)
 		if (graph->filters[i]->name) {
 			filter_name = std::string(graph->filters[i]->name);
 			ZmqLogger::Instance()->AppendDebugMethod(filter_name, "i", i);
-			if (filter_name.compare(0, 17, "Parsed_buffersink") == 0)
+			if (filter_name.compare(0, std::string("Parsed_buffersink").length(), "Parsed_buffersink") == 0)
 				break;
 		}
 
