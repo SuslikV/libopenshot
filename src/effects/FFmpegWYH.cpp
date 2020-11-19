@@ -189,9 +189,14 @@ std::shared_ptr<Frame> FFmpegWYH::GetFrame(std::shared_ptr<Frame> frame, int64_t
 	ZmqLogger::Instance()->AppendDebugMethod("av_image_copy done");
 
 	ZmqLogger::Instance()->AppendDebugMethod("filters names from graph");
-	for (i = 0; i < graph->nb_filters; i++)
+	// look for the output buffersink full name (like "Parsed_buffersink_3"), backward because it always lies close to the end
+	std::string filter_name = "";
+	for (i = graph->nb_filters - 1; i >= 0; i++)
 		if (graph->filters[i]->name) {
-			ZmqLogger::Instance()->AppendDebugMethod(std::string(graph->filters[i]->name), "i", i);
+			filter_name = std::string(graph->filters[i]->name);
+			ZmqLogger::Instance()->AppendDebugMethod(filter_name, "i", i);
+			if (filter_name.compare(0, std::string("Parsed_buffersink").length(), "Parsed_buffersink") == 0)
+				break;
 		}
 
 	// get buffers to load source and get final picture
@@ -202,7 +207,7 @@ std::shared_ptr<Frame> FFmpegWYH::GetFrame(std::shared_ptr<Frame> frame, int64_t
 		goto end;
 	}
 
-	sink_buf_ctx = avfilter_graph_get_filter(graph, "Parsed_buffersink_2");
+	sink_buf_ctx = avfilter_graph_get_filter(graph, filter_name);
 	if (sink_buf_ctx == NULL) {
 		// skip further processing
 		func_fail = 80;
