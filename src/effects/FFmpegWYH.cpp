@@ -185,15 +185,35 @@ std::shared_ptr<Frame> FFmpegWYH::GetFrame(std::shared_ptr<Frame> frame, int64_t
 	//av_image_copy(filtered_frame->data, filtered_frame->linesize, (const uint8_t **)f->data, src_linesize, PIX_FMT_RGBA, w, h);
 	av_image_copy(filtered_frame->data, filtered_frame->linesize, (const uint8_t**) pixels, src_linesize, PIX_FMT_RGBA, w, h);
 
+	ZmqLogger::Instance()->AppendDebugMethod("av_image_copy done");
+
+	int i;
+	ZmqLogger::Instance()->AppendDebugMethod("filters names from graph");
+	for (i = 0; i < graph->nb_filters; i++)
+		if (graph->filters[i]->name {
+			ZmqLogger::Instance()->AppendDebugMethod(std:string(graph->filters[i]->name), "i" = i);
+		}
+
 	// get buffers to load source and get final picture
 	in_buf_src_ctx = avfilter_graph_get_filter(graph, "Parsed_buffer_0");
+	if (in_buf_src_ctx == NULL) {
+		// skip further processing
+		func_fail = 70;
+		goto end;
+	}
+
 	sink_buf_ctx = avfilter_graph_get_filter(graph, "Parsed_buffersink_2");
+	if (sink_buf_ctx == NULL) {
+		// skip further processing
+		func_fail = 80;
+		goto end;
+	}
 
 	// load picture into input buffer
 	ret = av_buffersrc_add_frame(in_buf_src_ctx, filtered_frame);
 	if (ret < 0) {
 		// skip further processing
-		func_fail = 70;
+		func_fail = 90;
 		goto end;
 	}
 
@@ -201,7 +221,7 @@ std::shared_ptr<Frame> FFmpegWYH::GetFrame(std::shared_ptr<Frame> frame, int64_t
 	ret = av_buffersink_get_frame(sink_buf_ctx, filtered_frame);
 	if (ret < 0) {
 		// skip further processing
-		func_fail = 80;
+		func_fail = 100;
 		goto end;
 	}
 
