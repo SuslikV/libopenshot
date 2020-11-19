@@ -182,8 +182,9 @@ std::shared_ptr<Frame> FFmpegWYH::GetFrame(std::shared_ptr<Frame> frame, int64_t
 	ZmqLogger::Instance()->AppendDebugMethod("AVFrame src_linesize", "[0]", src_linesize[0], "[1]", src_linesize[1], "[2]", src_linesize[2], "[3]", src_linesize[3]);
 
 	// copy frame_image data into filtered_frame (not filtered yet)
-	//av_image_copy(filtered_frame->data, filtered_frame->linesize, (const uint8_t **)f->data, src_linesize, PIX_FMT_RGBA, w, h);
-	av_image_copy(filtered_frame->data, filtered_frame->linesize, (const uint8_t**) pixels, src_linesize, PIX_FMT_RGBA, w, h);
+	// source has no data[4] pointers but single one
+	//av_image_copy(filtered_frame->data, filtered_frame->linesize, (const uint8_t**) pixels, src_linesize, PIX_FMT_RGBA, w, h);
+	memcpy(filtered_frame->data[0], pixels, pixels_data_size);
 
 	ZmqLogger::Instance()->AppendDebugMethod("av_image_copy done");
 
