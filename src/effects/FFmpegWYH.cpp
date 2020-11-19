@@ -158,10 +158,6 @@ std::shared_ptr<Frame> FFmpegWYH::GetFrame(std::shared_ptr<Frame> frame, int64_t
 		goto end;
 	}
 
-	av_opt_set_int(filtered_frame, "width", w, 0);
-	av_opt_set_int(filtered_frame, "height", h, 0);
-	av_opt_set_int(filtered_frame, "format", (int) PIX_FMT_RGBA, 0);
-
 	// allocate buffer and pointers for the filtered_frame
 	ret = av_image_alloc(filtered_frame->data, filtered_frame->linesize, w, h, PIX_FMT_RGBA, 1);
 	if (ret < 0) {
@@ -170,6 +166,9 @@ std::shared_ptr<Frame> FFmpegWYH::GetFrame(std::shared_ptr<Frame> frame, int64_t
 		goto end;
 	}
 
+	av_opt_set_int(filtered_frame, "width", w, 0);
+	av_opt_set_int(filtered_frame, "height", h, 0);
+	av_opt_set_int(filtered_frame, "format", (int) PIX_FMT_RGBA, 0);
 
 	// copy of filtered_frame linesizes
 	int src_linesize[4];
