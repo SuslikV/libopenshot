@@ -160,9 +160,9 @@ std::shared_ptr<Frame> FFmpegWYH::GetFrame(std::shared_ptr<Frame> frame, int64_t
 
 	ZmqLogger::Instance()->AppendDebugMethod("filtered_frame prop1", "w", filtered_frame->width, "h", filtered_frame->height, "format", filtered_frame->format);
 
-	av_opt_set_int(filtered_frame, "width", w, 0);
-	av_opt_set_int(filtered_frame, "height", h, 0);
-	av_opt_set_int(filtered_frame, "format", (int) PIX_FMT_RGBA, 0);
+	filtered_frame->width = w;
+	filtered_frame->height = h;
+	filtered_frame->format = PIX_FMT_RGBA;
 
 	ZmqLogger::Instance()->AppendDebugMethod("filtered_frame prop2", "w", filtered_frame->width, "h", filtered_frame->height, "format", filtered_frame->format);
 
