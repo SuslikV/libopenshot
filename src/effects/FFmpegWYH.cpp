@@ -158,9 +158,13 @@ std::shared_ptr<Frame> FFmpegWYH::GetFrame(std::shared_ptr<Frame> frame, int64_t
 		goto end;
 	}
 
+	ZmqLogger::Instance()->AppendDebugMethod("filtered_frame prop1", "w", filtered_frame->width, "h", filtered_frame->height, "format", filtered_frame->format);
+
 	av_opt_set_int(filtered_frame, "width", w, 0);
 	av_opt_set_int(filtered_frame, "height", h, 0);
 	av_opt_set_int(filtered_frame, "format", (int) PIX_FMT_RGBA, 0);
+
+	ZmqLogger::Instance()->AppendDebugMethod("filtered_frame prop2", "w", filtered_frame->width, "h", filtered_frame->height, "format", filtered_frame->format);
 
 	// allocate buffer and pointers for the filtered_frame
 	ret = av_image_alloc(filtered_frame->data, filtered_frame->linesize, w, h, PIX_FMT_RGBA, 1);
@@ -170,9 +174,11 @@ std::shared_ptr<Frame> FFmpegWYH::GetFrame(std::shared_ptr<Frame> frame, int64_t
 		goto end;
 	}
 
-	av_opt_set_int(filtered_frame, "width", w, 0);
-	av_opt_set_int(filtered_frame, "height", h, 0);
-	av_opt_set_int(filtered_frame, "format", (int) PIX_FMT_RGBA, 0);
+	ZmqLogger::Instance()->AppendDebugMethod("filtered_frame prop3", "w", filtered_frame->width, "h", filtered_frame->height, "format", filtered_frame->format);
+
+	//av_opt_set_int(filtered_frame, "width", w, 0);
+	//av_opt_set_int(filtered_frame, "height", h, 0);
+	//av_opt_set_int(filtered_frame, "format", (int) PIX_FMT_RGBA, 0);
 
 	// copy of filtered_frame linesizes
 	int src_linesize[4];
@@ -216,6 +222,8 @@ std::shared_ptr<Frame> FFmpegWYH::GetFrame(std::shared_ptr<Frame> frame, int64_t
 		func_fail = 80;
 		goto end;
 	}
+
+	ZmqLogger::Instance()->AppendDebugMethod("filtered_frame prop4", "w", filtered_frame->width, "h", filtered_frame->height, "format", filtered_frame->format);
 
 	// load picture into input buffer
 	ret = av_buffersrc_add_frame(in_buf_src_ctx, filtered_frame);
