@@ -225,6 +225,8 @@ std::shared_ptr<Frame> FFmpegWYH::GetFrame(std::shared_ptr<Frame> frame, int64_t
 
 	ZmqLogger::Instance()->AppendDebugMethod("filtered_frame prop4", "w", filtered_frame->width, "h", filtered_frame->height, "format", filtered_frame->format);
 
+	ZmqLogger::Instance()->AppendDebugMethod("filtered_frame 1", "av_frame_is_writable", av_frame_is_writable(filtered_frame));
+
 	// load picture into input buffer
 	ret = av_buffersrc_add_frame(in_buf_src_ctx, filtered_frame);
 	if (ret < 0) {
@@ -233,6 +235,8 @@ std::shared_ptr<Frame> FFmpegWYH::GetFrame(std::shared_ptr<Frame> frame, int64_t
 		goto end;
 	}
 
+	ZmqLogger::Instance()->AppendDebugMethod("filtered_frame 2", "av_frame_is_writable", av_frame_is_writable(filtered_frame));
+
 	// get filtered picture from the output buffer
 	ret = av_buffersink_get_frame(sink_buf_ctx, filtered_frame);
 	if (ret < 0) {
@@ -240,6 +244,8 @@ std::shared_ptr<Frame> FFmpegWYH::GetFrame(std::shared_ptr<Frame> frame, int64_t
 		func_fail = 100;
 		goto end;
 	}
+
+	ZmqLogger::Instance()->AppendDebugMethod("filtered_frame 3", "av_frame_is_writable", av_frame_is_writable(filtered_frame));
 
 	ZmqLogger::Instance()->AppendDebugMethod("AVFrame filterd_linesize", "[0]", filtered_frame->linesize[0], "[1]", filtered_frame->linesize[1], "[2]", filtered_frame->linesize[2], "[3]", filtered_frame->linesize[3]);
 	// copy filtered_frame data back to frame
