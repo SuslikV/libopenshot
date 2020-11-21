@@ -181,7 +181,7 @@ std::shared_ptr<Frame> FFmpegWYH::GetFrame(std::shared_ptr<Frame> frame, int64_t
 	}
 
 	// allocate buffer and pointers for the src_frame
-	ret = av_image_alloc(src_frame->data, src->linesize, w, h, PIX_FMT_RGBA, 1);
+	ret = av_image_alloc(src_frame->data, src_frame->linesize, w, h, PIX_FMT_RGBA, 1);
 	if (ret < 0) {
 		// skip further processing
 		func_fail = 65;
