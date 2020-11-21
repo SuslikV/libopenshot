@@ -56,7 +56,7 @@ std::shared_ptr<Frame> FFmpegWYH::GetFrame(std::shared_ptr<Frame> frame, int64_t
 	
 	AVFilterGraph *graph = NULL;
 	AVFilterInOut *f_inps = NULL, *f_outps = NULL;
-	AVFrame *filtered_frame = NULL;
+	AVFrame *filtered_frame = NULL, *src_frame = NULL;
 	char *filters_txt;
 	std::string filter_name = "";
 	AVFilterContext *in_buf_src_ctx, *sink_buf_ctx;
@@ -118,6 +118,7 @@ std::shared_ptr<Frame> FFmpegWYH::GetFrame(std::shared_ptr<Frame> frame, int64_t
 	
 	// building AVFarme
 	filtered_frame = av_frame_alloc();
+	src_frame = av_frame_alloc();
 
 	graph = avfilter_graph_alloc();
 	if (graph == NULL) {
@@ -159,12 +160,17 @@ std::shared_ptr<Frame> FFmpegWYH::GetFrame(std::shared_ptr<Frame> frame, int64_t
 	}
 
 	ZmqLogger::Instance()->AppendDebugMethod("filtered_frame prop1", "w", filtered_frame->width, "h", filtered_frame->height, "format", filtered_frame->format);
+	ZmqLogger::Instance()->AppendDebugMethod("src_frame prop1", "w", src_frame->width, "h", src_frame->height, "format", src_frame->format);
 
 	filtered_frame->width = w;
 	filtered_frame->height = h;
 	filtered_frame->format = PIX_FMT_RGBA;
+	src_frame->width = w;
+	src_frame->height = h;
+	src_frame->format = PIX_FMT_RGBA;
 
 	ZmqLogger::Instance()->AppendDebugMethod("filtered_frame prop2", "w", filtered_frame->width, "h", filtered_frame->height, "format", filtered_frame->format);
+	ZmqLogger::Instance()->AppendDebugMethod("src_frame prop2", "w", src_frame->width, "h", src_frame->height, "format", src_frame->format);
 
 	// allocate buffer and pointers for the filtered_frame
 	ret = av_image_alloc(filtered_frame->data, filtered_frame->linesize, w, h, PIX_FMT_RGBA, 1);
@@ -174,11 +180,19 @@ std::shared_ptr<Frame> FFmpegWYH::GetFrame(std::shared_ptr<Frame> frame, int64_t
 		goto end;
 	}
 
-	ZmqLogger::Instance()->AppendDebugMethod("filtered_frame prop3", "w", filtered_frame->width, "h", filtered_frame->height, "format", filtered_frame->format);
+	// allocate buffer and pointers for the src_frame
+	ret = av_image_alloc(src_frame->data, src->linesize, w, h, PIX_FMT_RGBA, 1);
+	if (ret < 0) {
+		// skip further processing
+		func_fail = 65;
+		goto end;
+	}
 
-	//av_opt_set_int(filtered_frame, "width", w, 0);
-	//av_opt_set_int(filtered_frame, "height", h, 0);
-	//av_opt_set_int(filtered_frame, "format", (int) PIX_FMT_RGBA, 0);
+	ZmqLogger::Instance()->AppendDebugMethod("filtered_frame 0", "av_frame_is_writable", av_frame_is_writable(filtered_frame));
+	ZmqLogger::Instance()->AppendDebugMethod("src_frame 0", "av_frame_is_writable", av_frame_is_writable(src_frame));
+
+	ZmqLogger::Instance()->AppendDebugMethod("filtered_frame prop3", "w", filtered_frame->width, "h", filtered_frame->height, "format", filtered_frame->format);
+	ZmqLogger::Instance()->AppendDebugMethod("src_frame prop3", "w", src_frame->width, "h", src_frame->height, "format", src_frame->format);
 
 	// copy of filtered_frame linesizes
 	int src_linesize[4];
@@ -191,12 +205,11 @@ std::shared_ptr<Frame> FFmpegWYH::GetFrame(std::shared_ptr<Frame> frame, int64_t
 	ZmqLogger::Instance()->AppendDebugMethod("img bytes perline", "bytesPerLine", frame_image->bytesPerLine(), "pixels_data_size", pixels_data_size);
 	ZmqLogger::Instance()->AppendDebugMethod("AVFrame src_linesize", "[0]", src_linesize[0], "[1]", src_linesize[1], "[2]", src_linesize[2], "[3]", src_linesize[3]);
 
-	// copy frame_image data into filtered_frame (not filtered yet)
+	// copy frame_image data into src_frame (not filtered yet)
 	// source has no data[4] pointers but single one
-	//av_image_copy(filtered_frame->data, filtered_frame->linesize, (const uint8_t**) pixels, src_linesize, PIX_FMT_RGBA, w, h);
-	memcpy(filtered_frame->data[0], pixels, pixels_data_size);
+	memcpy(src_frame->data[0], pixels, pixels_data_size);
 
-	ZmqLogger::Instance()->AppendDebugMethod("av_image_copy done");
+	ZmqLogger::Instance()->AppendDebugMethod("image copy done");
 
 	ZmqLogger::Instance()->AppendDebugMethod("filters names from graph");
 	// look for the output buffersink full name (like "Parsed_buffersink_3"), backward because it always lies close to the end
@@ -226,9 +239,10 @@ std::shared_ptr<Frame> FFmpegWYH::GetFrame(std::shared_ptr<Frame> frame, int64_t
 	ZmqLogger::Instance()->AppendDebugMethod("filtered_frame prop4", "w", filtered_frame->width, "h", filtered_frame->height, "format", filtered_frame->format);
 
 	ZmqLogger::Instance()->AppendDebugMethod("filtered_frame 1", "av_frame_is_writable", av_frame_is_writable(filtered_frame));
+	ZmqLogger::Instance()->AppendDebugMethod("src_frame 1", "av_frame_is_writable", av_frame_is_writable(src_frame));
 
 	// load picture into input buffer
-	ret = av_buffersrc_add_frame(in_buf_src_ctx, filtered_frame);
+	ret = av_buffersrc_add_frame(in_buf_src_ctx, src_frame);
 	if (ret < 0) {
 		// skip further processing
 		func_fail = 90;
@@ -236,6 +250,7 @@ std::shared_ptr<Frame> FFmpegWYH::GetFrame(std::shared_ptr<Frame> frame, int64_t
 	}
 
 	ZmqLogger::Instance()->AppendDebugMethod("filtered_frame 2", "av_frame_is_writable", av_frame_is_writable(filtered_frame));
+	ZmqLogger::Instance()->AppendDebugMethod("src_frame 2", "av_frame_is_writable", av_frame_is_writable(src_frame));
 
 	// get filtered picture from the output buffer
 	ret = av_buffersink_get_frame(sink_buf_ctx, filtered_frame);
@@ -246,6 +261,7 @@ std::shared_ptr<Frame> FFmpegWYH::GetFrame(std::shared_ptr<Frame> frame, int64_t
 	}
 
 	ZmqLogger::Instance()->AppendDebugMethod("filtered_frame 3", "av_frame_is_writable", av_frame_is_writable(filtered_frame));
+	ZmqLogger::Instance()->AppendDebugMethod("src_frame 3", "av_frame_is_writable", av_frame_is_writable(src_frame));
 
 	ZmqLogger::Instance()->AppendDebugMethod("AVFrame filterd_linesize", "[0]", filtered_frame->linesize[0], "[1]", filtered_frame->linesize[1], "[2]", filtered_frame->linesize[2], "[3]", filtered_frame->linesize[3]);
 	// copy filtered_frame data back to frame
@@ -259,6 +275,11 @@ end:
 	if (filtered_frame) {
 		ZmqLogger::Instance()->AppendDebugMethod("av_frame_free"); // string only
 		av_frame_free(&filtered_frame); // struct itself (holds only pointers to buffers)
+	}
+
+	if (src_frame) {
+		ZmqLogger::Instance()->AppendDebugMethod("av_frame_free"); // string only
+		av_frame_free(&src_frame); // struct itself (holds only pointers to buffers)
 	}
 
 	// free graph
