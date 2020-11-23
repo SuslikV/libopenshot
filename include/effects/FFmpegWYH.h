@@ -49,10 +49,19 @@ namespace openshot
 		std::string last_description_str;
 		int last_width, last_height;
 
+		std::string FrameProcessingStatus() const;
+
+		AVFilterGraph *graph = NULL;
+		AVFilterInOut *f_inps = NULL, *f_outps = NULL;
+		AVFrame *src_frame = NULL;
+		AVFilterContext *in_buf_src_ctx, *sink_buf_ctx;
+
 		/// Init effect settings
 		void init_effect_details();
-		
-		std::string FrameProcessingStatus() const;
+
+		void frame_reinit();
+		void free_in_buffer();
+		void free_graph();
 
 	public:
 		Keyframe P1; // Animated parameters
