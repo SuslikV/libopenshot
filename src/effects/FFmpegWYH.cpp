@@ -141,8 +141,9 @@ std::shared_ptr<Frame> FFmpegWYH::GetFrame(std::shared_ptr<Frame> frame, int64_t
 	if (last_description_str != description_str) {
 		// remember new filter description
 		last_description_str = description_str;
-	} else if (last_width == w && last_height == h) {
-			// graph is the same, no init, no parsing needed
+	} else if ((graph) && (last_width == w) && (last_height == h)) {
+			// graph is the same, no init, no parsing needed,
+			// if it is already exist (graph destroyed on fail)
 			ZmqLogger::Instance()->AppendDebugMethod("graph is the same");
 			goto data_feed;
 		}
