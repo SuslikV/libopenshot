@@ -316,7 +316,7 @@ std::shared_ptr<Frame> FFmpegWYH::GetFrame(std::shared_ptr<Frame> frame, int64_t
 	}
 
 	// check for final range of the image if any was changed
-	if (filtered_frame->color_range != AVCOL_RANGE_JPEG;) {
+	if (filtered_frame->color_range != AVCOL_RANGE_JPEG) {
 		// skip further processing
 		func_fail = 140;
 		goto end;
@@ -351,7 +351,7 @@ end:
 }
 
 // Generate string for status of the frame processing
-std::string FFmpegWYH::FrameProcessingStatus() {
+std::string FFmpegWYH::FrameProcessingStatus() const {
 
 	// Return last status as string
 	if (last_processing_status == 0){
