@@ -42,11 +42,17 @@ namespace openshot
 	 *
 	 * Can create many different powerful effects using FFmpeg.
 	 */
-	class FFmpegWYH : public EffectBase
+	// no subclassing - it is as is (c++11)
+	class FFmpegWYH final : public EffectBase
 	{
 	private:
+		std::string last_description_str;
+		int last_width, last_height;
+
 		/// Init effect settings
 		void init_effect_details();
+		
+		std::string FrameProcessingStatus();
 
 	public:
 		Keyframe P1; // Animated parameters
@@ -55,9 +61,14 @@ namespace openshot
 		Keyframe P4;
 		
 		std::string filter_graph_txt; // FFmpeg filter graph in text format
+		std::string friendly_name_str; // Name of the custom loaded filter
+		int last_processing_status; // Status of the frame processing 0 - filter is OK
 
 		/// Blank constructor, useful when using Json to load the effect properties
 		FFmpegWYH();
+		
+		// Destructor (final class)
+		~FFmpegWYH();
 
 		/// Default constructor, which takes FFmpeg graph in txt format.
 		///
