@@ -354,7 +354,7 @@ end:
 std::string FFmpegWYH::FrameProcessingStatus() const {
 
 	// Return last status as string
-	if (last_processing_status == 0){
+	if (last_processing_status == 0) {
 		return std::string("OK");
 	}
 	return std::string("Failed (" + std::to_string(last_processing_status) + ")");

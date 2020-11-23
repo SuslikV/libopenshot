@@ -42,8 +42,8 @@ namespace openshot
 	 *
 	 * Can create many different powerful effects using FFmpeg.
 	 */
-	// no subclassing - it is as is (c++11)
-	class FFmpegWYH final : public EffectBase
+
+	class FFmpegWYH : public EffectBase
 	{
 	private:
 		std::string last_description_str;
@@ -68,7 +68,7 @@ namespace openshot
 		FFmpegWYH();
 		
 		// Destructor (final class)
-		~FFmpegWYH();
+		virtual ~FFmpegWYH();
 
 		/// Default constructor, which takes FFmpeg graph in txt format.
 		///
