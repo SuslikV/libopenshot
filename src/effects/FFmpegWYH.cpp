@@ -10,7 +10,7 @@
 using namespace openshot;
 
 /// Blank constructor, useful when using Json to load the effect properties
-FFmpegWYH::FFmpegWYH() {
+FFmpegWYH::FFmpegWYH() : P1(0.0), P2(0.0), P3(0.0), P4(0.0) {
 	ZmqLogger::Instance()->AppendDebugMethod("FFmpegWYH create blank");
 	filter_graph_txt = "...";
 	friendly_name_str = "";
@@ -18,10 +18,6 @@ FFmpegWYH::FFmpegWYH() {
 	last_description_str = "";
 	last_width = 0;
 	last_height = 0;
-	P1(0.0);
-	P2(0.0);
-	P3(0.0);
-	P4(0.0);
 	// Init effect properties
 	init_effect_details();
 }
@@ -171,7 +167,6 @@ std::shared_ptr<Frame> FFmpegWYH::GetFrame(std::shared_ptr<Frame> frame, int64_t
 			last_width = w;
 			last_height = h;
 		}
-	}
 
 	// final filter graph description string
 	filters_txt = &description_str[0];
