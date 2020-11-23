@@ -142,7 +142,7 @@ std::shared_ptr<Frame> FFmpegWYH::GetFrame(std::shared_ptr<Frame> frame, int64_t
 		// remember new filter description
 		last_description_str = description_str;
 	} else if (last_width == w && last_height == h) {
-			// graph is the same, no reinit needed
+			// graph is the same, no init, no parsing needed
 			ZmqLogger::Instance()->AppendDebugMethod("graph is the same");
 			goto data_feed;
 		}
@@ -154,14 +154,6 @@ std::shared_ptr<Frame> FFmpegWYH::GetFrame(std::shared_ptr<Frame> frame, int64_t
 	// Frame modifications are starts from here
 
 	// useful link https://github.com/KDE/ffmpegthumbs/blob/master/ffmpegthumbnailer/moviedecoder.cpp
-
-	// Get new AVFrame
-	frame_reinit();
-	if (src_frame == NULL) {
-		// skip further processing
-		func_fail = 15;
-		goto end;
-	}
 
 	// Get new graph
 	free_graph();
@@ -198,14 +190,53 @@ std::shared_ptr<Frame> FFmpegWYH::GetFrame(std::shared_ptr<Frame> frame, int64_t
 		goto end;
 	}
 
-	ZmqLogger::Instance()->AppendDebugMethod("src_frame prop1", "w", src_frame->width, "h", src_frame->height, "format", src_frame->format, "range", src_frame->color_range);
+	ZmqLogger::Instance()->AppendDebugMethod("filters names from graph");
+	// look for the output buffersink full name (like "Parsed_buffersink_3"), backward because it always lies close to the end
+	for (i = graph->nb_filters - 1; i >= 0; i--)
+		if (graph->filters[i]->name) {
+			filter_name = std::string(graph->filters[i]->name);
+			ZmqLogger::Instance()->AppendDebugMethod(filter_name, "i", i);
+			if (filter_name.compare(0, std::string("Parsed_buffersink").length(), "Parsed_buffersink") == 0)
+				break;
+		}
 
-	// allocate buffer and pointers for the src_frame
-	ret = av_frame_get_buffer(src_frame, 1);
-	if (ret < 0) {
+	// get buffers to load source and get final picture
+	in_buf_src_ctx = avfilter_graph_get_filter(graph, "Parsed_buffer_0");
+	if (in_buf_src_ctx == NULL) {
 		// skip further processing
 		func_fail = 60;
 		goto end;
+	}
+
+	sink_buf_ctx = avfilter_graph_get_filter(graph, &filter_name[0]);
+	if (sink_buf_ctx == NULL) {
+		// skip further processing
+		func_fail = 70;
+		goto end;
+	}
+
+	// prepare for new in buffers allocation (for each new graph use new src_frame)
+	free_in_buffer();
+
+data_feed:
+	// Get new source AVFrame
+	frame_reinit();
+	if (src_frame == NULL) {
+		// skip further processing
+		func_fail = 75;
+		goto end;
+	}
+
+	ZmqLogger::Instance()->AppendDebugMethod("src_frame prop1", "w", src_frame->width, "h", src_frame->height, "format", src_frame->format, "range", src_frame->color_range);
+
+	// allocate buffer and pointers for the src_frame
+	if (av_frame_is_writable(src_frame) == 0) { // if src_frame not writable then...
+		ret = av_frame_get_buffer(src_frame, 1);
+		if (ret < 0) {
+			// skip further processing
+			func_fail = 80;
+			goto end;
+		}
 	}
 
 	ZmqLogger::Instance()->AppendDebugMethod("src_frame 0", "av_frame_is_writable", av_frame_is_writable(src_frame));
@@ -221,43 +252,19 @@ std::shared_ptr<Frame> FFmpegWYH::GetFrame(std::shared_ptr<Frame> frame, int64_t
 	//int src_linesize[AV_NUM_DATA_POINTERS];
 	//memcpy(&src_linesize, &src_frame->linesize, sizeof(src_frame->linesize));
 
-	ZmqLogger::Instance()->AppendDebugMethod("filters names from graph");
-	// look for the output buffersink full name (like "Parsed_buffersink_3"), backward because it always lies close to the end
-	for (i = graph->nb_filters - 1; i >= 0; i--)
-		if (graph->filters[i]->name) {
-			filter_name = std::string(graph->filters[i]->name);
-			ZmqLogger::Instance()->AppendDebugMethod(filter_name, "i", i);
-			if (filter_name.compare(0, std::string("Parsed_buffersink").length(), "Parsed_buffersink") == 0)
-				break;
-		}
-
-	// get buffers to load source and get final picture
-	in_buf_src_ctx = avfilter_graph_get_filter(graph, "Parsed_buffer_0");
-	if (in_buf_src_ctx == NULL) {
-		// skip further processing
-		func_fail = 70;
-		goto end;
-	}
-
-	sink_buf_ctx = avfilter_graph_get_filter(graph, &filter_name[0]);
-	if (sink_buf_ctx == NULL) {
-		// skip further processing
-		func_fail = 80;
-		goto end;
-	}
-
-data_feed:
 	// Fill AVFrame with actual data
 	ZmqLogger::Instance()->AppendDebugMethod("img bytes perline", "bytesPerLine", frame_image->bytesPerLine(), "pixels_data_size", pixels_data_size);
 	ZmqLogger::Instance()->AppendDebugMethod("AVFrame src_frame", "[0]", src_frame->linesize[0], "[1]", src_frame->linesize[1], "[2]", src_frame->linesize[2], "[3]", src_frame->linesize[3]);
+	ZmqLogger::Instance()->AppendDebugMethod("src_frame prop3", "w", src_frame->width, "h", src_frame->height, "format", src_frame->format, "range", src_frame->color_range);
+	ZmqLogger::Instance()->AppendDebugMethod("src_frame 1", "av_frame_is_writable", av_frame_is_writable(src_frame));
 
 	// copy frame_image data into src_frame (not filtered yet)
 	// source has no data[4] pointers but single one
 	memcpy(src_frame->data[0], pixels, pixels_data_size);
 
 	ZmqLogger::Instance()->AppendDebugMethod("image copy done");
-	ZmqLogger::Instance()->AppendDebugMethod("src_frame prop3", "w", src_frame->width, "h", src_frame->height, "format", src_frame->format, "range", src_frame->color_range);
-	ZmqLogger::Instance()->AppendDebugMethod("src_frame 1", "av_frame_is_writable", av_frame_is_writable(src_frame));
+	ZmqLogger::Instance()->AppendDebugMethod("src_frame prop4", "w", src_frame->width, "h", src_frame->height, "format", src_frame->format, "range", src_frame->color_range);
+	ZmqLogger::Instance()->AppendDebugMethod("src_frame 2", "av_frame_is_writable", av_frame_is_writable(src_frame));
 
 	// load picture into input buffer
 	ret = av_buffersrc_add_frame(in_buf_src_ctx, src_frame);
@@ -270,7 +277,7 @@ data_feed:
 	// building filtered AVFarme
 	filtered_frame = av_frame_alloc();
 
-	ZmqLogger::Instance()->AppendDebugMethod("src_frame 2", "av_frame_is_writable", av_frame_is_writable(src_frame));
+	ZmqLogger::Instance()->AppendDebugMethod("src_frame 3", "av_frame_is_writable", av_frame_is_writable(src_frame));
 	ZmqLogger::Instance()->AppendDebugMethod("AVFrame filtered_frame 2", "av_frame_is_writable", av_frame_is_writable(filtered_frame));
 
 	// get filtered picture from the output buffer
@@ -285,7 +292,7 @@ data_feed:
 		goto end;
 	}
 
-	ZmqLogger::Instance()->AppendDebugMethod("src_frame 3", "av_frame_is_writable", av_frame_is_writable(src_frame));
+	ZmqLogger::Instance()->AppendDebugMethod("src_frame 4", "av_frame_is_writable", av_frame_is_writable(src_frame));
 	ZmqLogger::Instance()->AppendDebugMethod("AVFrame filtered_frame 3", "av_frame_is_writable", av_frame_is_writable(filtered_frame));
 	ZmqLogger::Instance()->AppendDebugMethod("AVFrame filtered linesize", "[0]", filtered_frame->linesize[0], "[1]", filtered_frame->linesize[1], "[2]", filtered_frame->linesize[2], "[3]", filtered_frame->linesize[3]);
 	ZmqLogger::Instance()->AppendDebugMethod("AVFrame filtered", "w", filtered_frame->width, "h", filtered_frame->height, "format", filtered_frame->format, "range", filtered_frame->color_range);
@@ -318,7 +325,7 @@ data_feed:
 		goto end;
 	}
 
-	// copy src_frame data back to frame
+	// copy filtered_frame data back to frame
 	memcpy(pixels, filtered_frame->data[0], pixels_data_size);
 
 end:
@@ -334,16 +341,22 @@ end:
 		av_frame_free(&filtered_frame); // struct itself (holds only pointers to buffers)
 	}
 
+	if (func_fail != 0) {
+		free_in_buffer();
+		free_graph();
+	}
+
 	// return the modified frame
 	return frame;
 }
 
 void FFmpegWYH::frame_reinit()
 {
-	free_in_buffer();
+	//free_in_buffer();
 
 	// building AVFarme
-	src_frame = av_frame_alloc();
+	if (!src_frame)
+		src_frame = av_frame_alloc();
 	src_frame->width = last_width;
 	src_frame->height = last_height;
 	src_frame->format = PIX_FMT_RGBA;
