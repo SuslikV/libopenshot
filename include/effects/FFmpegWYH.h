@@ -52,7 +52,7 @@ namespace openshot
 		/// Init effect settings
 		void init_effect_details();
 		
-		std::string FrameProcessingStatus();
+		std::string FrameProcessingStatus() const;
 
 	public:
 		Keyframe P1; // Animated parameters
