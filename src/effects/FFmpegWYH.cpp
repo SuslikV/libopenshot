@@ -348,10 +348,10 @@ data_feed:
 	// linesize of the frame_image
 	//memcpy(pixels, filtered_frame->data[0], pixels_data_size);
 	for (int j = 0; j < h; j++) {
-		memcpy(pixels + 0 * w + k * line, filtered_frame->data[0] + 0 * filtered_frame->width + k * filtered_frame->linesize[0], w); // R
-		memcpy(pixels + 1 * w + k * line, filtered_frame->data[0] + 1 * filtered_frame->width + k * filtered_frame->linesize[0], w); // G
-		memcpy(pixels + 2 * w + k * line, filtered_frame->data[0] + 2 * filtered_frame->width + k * filtered_frame->linesize[0], w); // B
-		memcpy(pixels + 3 * w + k * line, filtered_frame->data[0] + 3 * filtered_frame->width + k * filtered_frame->linesize[0], w); // A
+		memcpy(pixels + 0 * w + j * line, filtered_frame->data[0] + 0 * filtered_frame->width + j * filtered_frame->linesize[0], w); // R
+		memcpy(pixels + 1 * w + j * line, filtered_frame->data[0] + 1 * filtered_frame->width + j * filtered_frame->linesize[0], w); // G
+		memcpy(pixels + 2 * w + j * line, filtered_frame->data[0] + 2 * filtered_frame->width + j * filtered_frame->linesize[0], w); // B
+		memcpy(pixels + 3 * w + j * line, filtered_frame->data[0] + 3 * filtered_frame->width + j * filtered_frame->linesize[0], w); // A
 	}
 
 end:
