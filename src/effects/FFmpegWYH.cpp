@@ -257,6 +257,7 @@ data_feed:
 	// Fill AVFrame with actual data
 	ZmqLogger::Instance()->AppendDebugMethod("img bytes perline", "bytesPerLine", frame_image->bytesPerLine(), "pixels_data_size", pixels_data_size);
 	ZmqLogger::Instance()->AppendDebugMethod("AVFrame src_frame", "[0]", src_frame->linesize[0], "[1]", src_frame->linesize[1], "[2]", src_frame->linesize[2], "[3]", src_frame->linesize[3]);
+	ZmqLogger::Instance()->AppendDebugMethod("AVFrame src_frame data ptr", "[0]", src_frame->data[0], "[1]", src_frame->data[1], "[2]", src_frame->data[2], "[3]", src_frame->data[3]);
 	ZmqLogger::Instance()->AppendDebugMethod("src_frame 1", "av_frame_is_writable", av_frame_is_writable(src_frame));
 
 	// assuming that the frame_image is not bigger than the allocated AVFrame
@@ -272,7 +273,10 @@ data_feed:
 	// both images is RGBA with no planes and has one linesize field
 	//memcpy(src_frame->data[0], pixels, pixels_data_size);
 	for (int k = 0; k < h; k++) {
-		memcpy(filtered_frame->data[0] + k * filtered_frame->linesize[0], pixels + k * line, line);
+		memcpy(src_frame->data[0] + 0 * src_frame->width + k * src_linesize[0], pixels + 0 * w + k * line, w); // R or A
+		memcpy(src_frame->data[0] + 1 * src_frame->width + k * src_linesize[0], pixels + 1 * w + k * line, w); // G    B
+		memcpy(src_frame->data[0] + 2 * src_frame->width + k * src_linesize[0], pixels + 2 * w + k * line, w); // B    G
+		memcpy(src_frame->data[0] + 3 * src_frame->width + k * src_linesize[0], pixels + 3 * w + k * line, w); // A    R
 	}
 
 	ZmqLogger::Instance()->AppendDebugMethod("image copy done");
@@ -338,11 +342,16 @@ data_feed:
 		goto end;
 	}
 
+	ZmqLogger::Instance()->AppendDebugMethod("AVFrame filtered_frame data ptr", "[0]", filtered_frame->data[0], "[1]", filtered_frame->data[1], "[2]", filtered_frame->data[2], "[3]", filtered_frame->data[3]);
+
 	// copy filtered_frame data back to frame taking into account
 	// linesize of the frame_image
 	//memcpy(pixels, filtered_frame->data[0], pixels_data_size);
 	for (int j = 0; j < h; j++) {
-		memcpy(pixels + j * line, filtered_frame->data[0] + j * filtered_frame->linesize[0], line);
+		memcpy(pixels + 0 * w + k * line, filtered_frame->data[0] + 0 * filtered_frame->width + k * filtered_frame->linesize[0], w); // R
+		memcpy(pixels + 1 * w + k * line, filtered_frame->data[0] + 1 * filtered_frame->width + k * filtered_frame->linesize[0], w); // G
+		memcpy(pixels + 2 * w + k * line, filtered_frame->data[0] + 2 * filtered_frame->width + k * filtered_frame->linesize[0], w); // B
+		memcpy(pixels + 3 * w + k * line, filtered_frame->data[0] + 3 * filtered_frame->width + k * filtered_frame->linesize[0], w); // A
 	}
 
 end:
