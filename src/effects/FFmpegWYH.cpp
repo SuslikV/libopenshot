@@ -94,6 +94,7 @@ std::shared_ptr<Frame> FFmpegWYH::GetFrame(std::shared_ptr<Frame> frame, int64_t
 	uint8_t *pixels = (uint8_t *) frame_image->scanLine(0);
 	int w = frame_image->width();
 	int h = frame_image->height();
+	int line = frame_image->bytesPerLine();
 	int pixels_data_size = frame_image->bytesPerLine() * frame_image->height();
 
 	// streamline the text
@@ -232,7 +233,7 @@ data_feed:
 
 	// allocate buffer and pointers for the src_frame
 	if (av_frame_is_writable(src_frame) == 0) { // if src_frame not writable then...
-		ret = av_frame_get_buffer(src_frame, 1);
+		ret = av_frame_get_buffer(src_frame, 0); // alignment will be set to 32
 		if (ret < 0) {
 			// skip further processing
 			func_fail = 80;
@@ -240,8 +241,8 @@ data_feed:
 		}
 	}
 
-	ZmqLogger::Instance()->AppendDebugMethod("src_frame 0", "av_frame_is_writable", av_frame_is_writable(src_frame));
 	ZmqLogger::Instance()->AppendDebugMethod("src_frame prop2", "w", src_frame->width, "h", src_frame->height, "format", src_frame->format, "range", src_frame->color_range);
+	ZmqLogger::Instance()->AppendDebugMethod("src_frame 0", "av_frame_is_writable", av_frame_is_writable(src_frame));
 
 	// copy of src_frame linesizes (only 4 of them)
 	int src_linesize[4];
@@ -256,15 +257,26 @@ data_feed:
 	// Fill AVFrame with actual data
 	ZmqLogger::Instance()->AppendDebugMethod("img bytes perline", "bytesPerLine", frame_image->bytesPerLine(), "pixels_data_size", pixels_data_size);
 	ZmqLogger::Instance()->AppendDebugMethod("AVFrame src_frame", "[0]", src_frame->linesize[0], "[1]", src_frame->linesize[1], "[2]", src_frame->linesize[2], "[3]", src_frame->linesize[3]);
-	ZmqLogger::Instance()->AppendDebugMethod("src_frame prop3", "w", src_frame->width, "h", src_frame->height, "format", src_frame->format, "range", src_frame->color_range);
 	ZmqLogger::Instance()->AppendDebugMethod("src_frame 1", "av_frame_is_writable", av_frame_is_writable(src_frame));
+
+	// assuming that the frame_image is not bigger than the allocated AVFrame
+	if (line > src_linesize[0]) {
+		// skip further processing
+		func_fail = 85;
+		goto end;
+	}
 
 	// copy frame_image data into src_frame (not filtered yet)
 	// source has no data[4] pointers but single one
-	memcpy(src_frame->data[0], pixels, pixels_data_size);
+	// taking into account the linesize of the frame_image
+	// both images is RGBA with no planes and has one linesize field
+	//memcpy(src_frame->data[0], pixels, pixels_data_size);
+	for (int k = 0; k < h; k++) {
+		memcpy(filtered_frame->data[0] + k * filtered_frame->linesize[0], pixels + k * line, line);
+	}
 
 	ZmqLogger::Instance()->AppendDebugMethod("image copy done");
-	ZmqLogger::Instance()->AppendDebugMethod("src_frame prop4", "w", src_frame->width, "h", src_frame->height, "format", src_frame->format, "range", src_frame->color_range);
+	ZmqLogger::Instance()->AppendDebugMethod("src_frame prop3", "w", src_frame->width, "h", src_frame->height, "format", src_frame->format, "range", src_frame->color_range);
 	ZmqLogger::Instance()->AppendDebugMethod("src_frame 2", "av_frame_is_writable", av_frame_is_writable(src_frame));
 
 	// load picture into input buffer
@@ -305,15 +317,15 @@ data_feed:
 		goto end;
 	}
 
-	// check for final image linesizes if any was changed
-	if (memcmp(&src_linesize, &filtered_frame->linesize, sizeof(src_linesize)) != 0) {
+	// check for final size of the image if any was changed
+	if (filtered_frame->width != w || filtered_frame->height != h) {
 		// skip further processing
 		func_fail = 120;
 		goto end;
 	}
 
-	// check for final size of the image if any was changed
-	if (filtered_frame->width != w || filtered_frame->height != h) {
+	// check for final image linesizes if any (but first) was changed
+	if (memcmp(&src_linesize + sizeof(int), &filtered_frame->linesize + sizeof(int), sizeof(src_linesize) - sizeof(int)) != 0) {
 		// skip further processing
 		func_fail = 130;
 		goto end;
@@ -326,8 +338,12 @@ data_feed:
 		goto end;
 	}
 
-	// copy filtered_frame data back to frame
-	memcpy(pixels, filtered_frame->data[0], pixels_data_size);
+	// copy filtered_frame data back to frame taking into account
+	// linesize of the frame_image
+	//memcpy(pixels, filtered_frame->data[0], pixels_data_size);
+	for (int j = 0; j < h; j++) {
+		memcpy(pixels + j * line, filtered_frame->data[0] + j * filtered_frame->linesize[0], line);
+	}
 
 end:
 	// Debug output
