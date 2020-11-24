@@ -142,7 +142,7 @@ std::shared_ptr<Frame> FFmpegWYH::GetFrame(std::shared_ptr<Frame> frame, int64_t
 	sws_flags_str += "+accurate_rnd+full_chroma_int";
 
 	if (friendly_name_str == "debug")
-		sws_flags_str = "+print_info";
+		sws_flags_str += "+print_info";
 
 	sws_flags_str += "; ";
 
