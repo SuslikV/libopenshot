@@ -72,9 +72,10 @@ std::shared_ptr<Frame> FFmpegWYH::GetFrame(std::shared_ptr<Frame> frame, int64_t
 
 	std::string part_only = "";
 	std::string version_str = "";
-	std::string comment_str = "";
+	//std::string comment_str = "";
 	std::string description_str = "";
 	std::string arg_str = "";
+	std::string sws_flags_str = "sws_flags=fast_bilinear";
 
 	friendly_name_str = "";
 
@@ -133,8 +134,20 @@ std::shared_ptr<Frame> FFmpegWYH::GetFrame(std::shared_ptr<Frame> frame, int64_t
 		description_str = std::regex_replace(description_str, std::regex("P_4"), P4_str);
 	}
 
+	if (openshot::Settings::Instance()->HIGH_QUALITY_SCALING)
+		sws_flags_str = "sws_flags=bicubic";
+
+	// no simplifications for chroma scaling if any will take place
+	// anyway it is better to not use the filters that doesn't supports RGBA
+	sws_flags_str += "+accurate_rnd+full_chroma_int";
+
+	if (friendly_name_str == "debug")
+		description_str = "+print_info";
+
+	sws_flags_str += "; ";
+
 	// std::to_string((int) PIX_FMT_RGBA) == 26
-	description_str = "buffer=video_size=" + std::to_string(w) + "x"+ std::to_string(h) + ":pix_fmt=26:time_base=1/25:pixel_aspect=1/1 " + description_str;
+	description_str = sws_flags_str + "buffer=video_size=" + std::to_string(w) + "x"+ std::to_string(h) + ":pix_fmt=26:time_base=1/25:pixel_aspect=1/1 " + description_str;
 
 	// in file part:
 	// "[in_1];movie=C\\:\\\\Temp\\\\clut_ffmpeg_shift_exposure.png [clut];[in_1][clut] haldclut [result];[result] buffersink"
