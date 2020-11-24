@@ -257,7 +257,7 @@ data_feed:
 	// Fill AVFrame with actual data
 	ZmqLogger::Instance()->AppendDebugMethod("img bytes perline", "bytesPerLine", frame_image->bytesPerLine(), "pixels_data_size", pixels_data_size);
 	ZmqLogger::Instance()->AppendDebugMethod("AVFrame src_frame", "[0]", src_frame->linesize[0], "[1]", src_frame->linesize[1], "[2]", src_frame->linesize[2], "[3]", src_frame->linesize[3]);
-	ZmqLogger::Instance()->AppendDebugMethod("AVFrame src_frame data ptr", "[0]", src_frame->data[0], "[1]", src_frame->data[1], "[2]", src_frame->data[2], "[3]", src_frame->data[3]);
+	ZmqLogger::Instance()->AppendDebugMethod("AVFrame src_frame data ptr", "[0]", *src_frame->data[0], "[1]", *src_frame->data[1], "[2]", *src_frame->data[2], "[3]", *src_frame->data[3]);
 	ZmqLogger::Instance()->AppendDebugMethod("src_frame 1", "av_frame_is_writable", av_frame_is_writable(src_frame));
 
 	// assuming that the frame_image is not bigger than the allocated AVFrame
@@ -342,7 +342,7 @@ data_feed:
 		goto end;
 	}
 
-	ZmqLogger::Instance()->AppendDebugMethod("AVFrame filtered_frame data ptr", "[0]", filtered_frame->data[0], "[1]", filtered_frame->data[1], "[2]", filtered_frame->data[2], "[3]", filtered_frame->data[3]);
+	ZmqLogger::Instance()->AppendDebugMethod("AVFrame filtered_frame data ptr", "[0]", *filtered_frame->data[0], "[1]", *filtered_frame->data[1], "[2]", *filtered_frame->data[2], "[3]", *filtered_frame->data[3]);
 
 	// copy filtered_frame data back to frame taking into account
 	// linesize of the frame_image
