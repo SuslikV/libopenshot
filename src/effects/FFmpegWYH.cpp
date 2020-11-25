@@ -396,6 +396,9 @@ void FFmpegWYH::frame_reinit()
 	//src_frame->color_trc = AVCOL_TRC_BT709;
 	//src_frame->colorspace = AVCOL_SPC_BT709;
 	//src_frame->chroma_location = AVCHROMA_LOC_LEFT;
+
+	// some filters may use framesync, so set frame as having 0 pts here
+	src_frame->pts = 0;
 }
 
 void FFmpegWYH::free_in_buffer()
