@@ -425,7 +425,29 @@ std::string FFmpegWYH::FrameProcessingStatus() const {
 	if (last_processing_status == 0) {
 		return std::string("OK");
 	}
-	return std::string("Failed (" + std::to_string(last_processing_status) + ")");
+
+	std::string msg;
+	switch (last_processing_status) {
+		case  10: msg = "Ver./Graph string empty";   break;
+		case  20: msg = "No RAM for graph";          break;
+		case  30: msg = "Graph syntax error";        break;
+		case  40: msg = "Some In/Out not connected"; break;
+		case  50: msg = "Graph config failed";       break;
+		case  60: msg = "Input buff not found";      break;
+		case  70: msg = "Output buff not found";     break;
+		case  75: msg = "No RAM for frame stuct";    break;
+		case  80: msg = "No RAM for frame buff";     break;
+		case  85: msg = "Src linesize > Dst";        break;
+		case  90: msg = "Load into buff failed";     break;
+		case 100: msg = "Get from buff failed";      break;
+		case 110: msg = "Not RGBA final format";     break;
+		case 120: msg = "Final size(WxH) changed";   break;
+		case 130: msg = "Not packed RGBA format";    break;
+		case 140: msg = "Color Range != PC";         break;
+		default : msg = "Unknown";
+	}
+
+	return std::string("(" + std::to_string(last_processing_status) + ") " + msg);
 }
 
 // Generate JSON string of this object
