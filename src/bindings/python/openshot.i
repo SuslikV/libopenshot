@@ -221,6 +221,7 @@
 %include "effects/ColorShift.h"
 %include "effects/Crop.h"
 %include "effects/Deinterlace.h"
+%include "effects/FFmpegWYH.h"
 %include "effects/Hue.h"
 %include "effects/Mask.h"
 %include "effects/Negate.h"

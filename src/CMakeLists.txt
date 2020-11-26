@@ -174,6 +174,7 @@ set(EFFECTS_SOURCES
   effects/ColorShift.cpp
   effects/Crop.cpp
   effects/Deinterlace.cpp
+  effects/FFmpegWYH.cpp
   effects/Hue.cpp
   effects/Mask.cpp
   effects/Negate.cpp
