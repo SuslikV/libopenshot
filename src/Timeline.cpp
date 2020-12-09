@@ -854,6 +854,7 @@ std::shared_ptr<Frame> Timeline::GetFrame(int64_t requested_frame)
 
 	// Check cache
 	std::shared_ptr<Frame> frame;
+	const std::lock_guard<std::mutex> lock_it(get_frame_mutex); // until destruction on the end of the block
 	#pragma omp critical (T_GetFrame)
 	frame = final_cache->GetFrame(requested_frame);
 	if (frame) {
